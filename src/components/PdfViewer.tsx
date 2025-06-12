@@ -40,6 +40,7 @@ export function PdfViewer({ document }: PdfViewerProps) {
         </CardHeader>
         <CardContent className="text-center">
           <Image 
+            priority
             src="https://placehold.co/600x400.png" // Placeholder for non-PDF document
             alt="Document placeholder"
             width={600}
