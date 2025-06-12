@@ -1,5 +1,5 @@
 
-import { getUnitsBySemester, getSemesterById } from "@/lib/data";
+import { getUnitsBySemester, getSemesterById, getSemesters } from "@/lib/data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -81,3 +81,4 @@ export async function generateStaticParams() {
   const semesters = getSemesters();
   return semesters.map(semester => ({ semester: semester.id }));
 }
+
