@@ -1,10 +1,13 @@
 
+"use client";
+
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { DocumentFile } from "@/lib/types";
 import { FileText, FileVideo, FileArchive, Link as LinkIcon, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { useState, useEffect } from 'react';
 
 interface DocumentCardProps {
   document: DocumentFile;
@@ -28,6 +31,13 @@ const getIconForType = (type: DocumentFile['type']) => {
 export function DocumentCard({ document }: DocumentCardProps) {
   const isExternalLink = document.type === 'link' && document.url.startsWith('http');
   const viewPath = isExternalLink ? document.url : `/documents/view/${document.id}`;
+  const [displayDate, setDisplayDate] = useState<string>('');
+
+  useEffect(() => {
+    if (document.uploadedAt) {
+      setDisplayDate(new Date(document.uploadedAt).toLocaleDateString());
+    }
+  }, [document.uploadedAt]);
 
   return (
     <Card className="flex flex-col justify-between hover:shadow-lg transition-shadow duration-200">
@@ -38,7 +48,7 @@ export function DocumentCard({ document }: DocumentCardProps) {
         </div>
         <CardTitle className="text-lg leading-tight font-headline">{document.name}</CardTitle>
         <CardDescription className="text-xs">
-          Uploaded: {new Date(document.uploadedAt).toLocaleDateString()}
+          Uploaded: {displayDate || "..."}
           {document.size && ` | Size: ${document.size}`}
         </CardDescription>
       </CardHeader>

@@ -1,11 +1,20 @@
 
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookMarked, LogIn } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { useState, useEffect } from 'react';
 
 export default function LandingPage() {
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-background to-secondary">
       <header className="p-6 flex justify-between items-center">
@@ -57,7 +66,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="text-center p-6 text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} TaskTide. All rights reserved.</p>
+        <p>&copy; {currentYear !== null ? currentYear : "..."} TaskTide. All rights reserved.</p>
       </footer>
     </div>
   );
