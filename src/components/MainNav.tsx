@@ -5,11 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  FolderKanban,
-  Users,
   Bell,
   SettingsIcon,
-  PlusSquare,
+  LayoutGrid, // Changed from FolderKanban, Users
 } from "lucide-react";
 import {
   SidebarMenu,
@@ -25,16 +23,13 @@ export function MainNav() {
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/documents", label: "Documents", icon: FolderKanban },
-    { href: "/groups", label: "Groups", icon: Users },
+    { href: "/rooms", label: "Rooms", icon: LayoutGrid }, // New "Rooms" item
     { href: "/notifications", label: "Notifications", icon: Bell },
     { href: "/settings", label: "Settings", icon: SettingsIcon },
   ];
 
-  if (role === 'class_representative') {
-    // Example of adding a role-specific item, or you can modify existing items/pages
-    // For now, group creation is handled within the /groups page itself.
-  }
+  // Role-specific items can be added here if needed in the future
+  // if (role === 'class_representative') {}
 
   return (
     <SidebarMenu>

@@ -13,32 +13,30 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationMessage[]>([]);
   
   useEffect(() => {
-    // Initial load and ensure it's sorted
-    setNotifications([...staticNotifications].sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()));
+    const initialNotifications = [...staticNotifications].sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    setNotifications(initialNotifications);
   }, []);
 
   const handleMarkAsRead = (id: string) => {
-    markNotificationAsRead(id);
+    markNotificationAsRead(id); // This updates the source data
     setNotifications(prev => 
-        prev.map(n => n.id === id ? { ...n, read: true } : n)
-        .sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        [...staticNotifications].sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     );
   };
 
   const handleMarkAllAsRead = () => {
-    notifications.forEach(n => {
-      if (!n.read) markNotificationAsRead(n.id);
+    staticNotifications.forEach(n => {
+      if (!n.read) markNotificationAsRead(n.id); // This updates the source data
     });
     setNotifications(prev => 
-        prev.map(n => ({ ...n, read: true }))
-        .sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        [...staticNotifications].sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     );
   };
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="container mx-auto py-2">
+    <div className="container mx-auto py-6">
       <header className="mb-8 flex justify-between items-center">
         <div>
             <h1 className="text-4xl font-bold font-headline text-primary flex items-center">

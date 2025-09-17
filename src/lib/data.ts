@@ -17,18 +17,19 @@ export const mockUserClassRep: User = {
   avatarUrl: 'https://placehold.co/100x100.png',
 };
 
-export const semesters: Semester[] = [
-  { id: 'sem1', name: 'Semester 1' },
-  { id: 'sem2', name: 'Semester 2' },
-  { id: 'sem3', name: 'Semester 3' },
+export let semesters: Semester[] = [
+  { id: 'sem1', name: 'Foundational Year Studies', isPublic: true, createdBy: { id: mockUserClassRep.id, name: mockUserClassRep.name } },
+  { id: 'sem2', name: 'Intermediate Group Projects', isPublic: true, createdBy: { id: mockUserClassRep.id, name: mockUserClassRep.name } },
+  { id: 'sem3', name: 'Advanced Research Topics', isPublic: false, createdBy: { id: mockUserClassRep.id, name: mockUserClassRep.name } },
 ];
 
 export const units: Unit[] = [
-  { id: 'unit101', name: 'Introduction to Programming', semesterId: 'sem1' },
-  { id: 'unit102', name: 'Calculus I', semesterId: 'sem1' },
-  { id: 'unit201', name: 'Data Structures', semesterId: 'sem2' },
-  { id: 'unit202', name: 'Linear Algebra', semesterId: 'sem2' },
-  { id: 'unit301', name: 'Algorithms', semesterId: 'sem3' },
+  { id: 'unit101', name: 'Introduction to Programming', semesterId: 'sem1', description: 'Learn the basics of coding.' },
+  { id: 'unit102', name: 'Calculus I', semesterId: 'sem1', description: 'Fundamental concepts of calculus.' },
+  { id: 'unit201', name: 'Data Structures', semesterId: 'sem2', description: 'Explore common data structures.' },
+  { id: 'unit202', name: 'Linear Algebra', semesterId: 'sem2', description: 'Matrices, vectors, and linear transformations.' },
+  { id: 'unit301', name: 'Algorithms', semesterId: 'sem3', description: 'Design and analysis of algorithms.' },
+  { id: 'unit302', name: 'Senior Project Prep', semesterId: 'sem3', description: 'Preparing for the final year project.' },
 ];
 
 export const documents: DocumentFile[] = [
@@ -40,13 +41,13 @@ export const documents: DocumentFile[] = [
   { id: 'doc006', name: 'Introductory Video.mp4', type: 'video', url: '#', uploadedAt: new Date('2023-09-01T10:00:00Z').toISOString(), semesterId: 'sem1', unitId: 'unit101', size: '50.2MB' },
 ];
 
-export const assignmentGroups: AssignmentGroup[] = [
+export let assignmentGroups: AssignmentGroup[] = [
   { id: 'group001', assignmentName: 'Project Alpha - Programming', maxSize: 4, members: [{id: 'user_student_01', name: 'Alex Student'}], createdBy: {id: 'user_classrep_01', name: 'Casey ClassRep'}, unitId: 'unit101', semesterId: 'sem1'},
   { id: 'group002', assignmentName: 'Calculus Problem Set 1', maxSize: 3, members: [], createdBy: {id: 'user_classrep_01', name: 'Casey ClassRep'}, unitId: 'unit102', semesterId: 'sem1'},
   { id: 'group003', assignmentName: 'Data Structures Lab 2', maxSize: 2, members: [], createdBy: {id: 'user_classrep_01', name: 'Casey ClassRep'}, unitId: 'unit201', semesterId: 'sem2'},
 ];
 
-export const notifications: NotificationMessage[] = [
+export let notifications: NotificationMessage[] = [
   { id: 'notif001', title: 'New Document Uploaded', description: 'Syllabus.pdf was added to Introduction to Programming.', timestamp: new Date('2023-09-01T10:05:00Z').toISOString(), read: false, link: '/documents/sem1/unit101' },
   { id: 'notif002', title: 'Group Created', description: 'A new group for Project Alpha has been created.', timestamp: new Date('2023-09-02T15:00:00Z').toISOString(), read: true, link: '/groups' },
   { id: 'notif003', title: 'Assignment Reminder', description: 'Assignment 1 for Introduction to Programming is due soon.', timestamp: new Date('2023-09-15T09:00:00Z').toISOString(), read: false },
@@ -54,6 +55,7 @@ export const notifications: NotificationMessage[] = [
 
 // Helper functions
 export const getSemesters = (): Semester[] => semesters;
+
 export const getUnitsBySemester = (semesterId: string): Unit[] => units.filter(u => u.semesterId === semesterId);
 export const getDocumentsByUnit = (semesterId: string, unitId: string): DocumentFile[] => 
   documents.filter(d => d.semesterId === semesterId && d.unitId === unitId);
@@ -61,7 +63,11 @@ export const getDocumentById = (docId: string): DocumentFile | undefined => docu
 export const getSemesterById = (semesterId: string): Semester | undefined => semesters.find(s => s.id === semesterId);
 export const getUnitById = (unitId: string): Unit | undefined => units.find(u => u.id === unitId);
 
-export const getGroups = (): AssignmentGroup[] => assignmentGroups;
+export const getGroups = (): AssignmentGroup[] => assignmentGroups; // Primarily for all groups page if re-enabled
+
+export const getGroupsByUnitAndSemester = (semesterId: string, unitId: string): AssignmentGroup[] => 
+  assignmentGroups.filter(g => g.semesterId === semesterId && g.unitId === unitId);
+
 export const addGroup = (group: Omit<AssignmentGroup, 'id' | 'members'>, creator: User): AssignmentGroup => {
   const newGroup: AssignmentGroup = {
     ...group,
@@ -98,4 +104,3 @@ export const addNotification = (title: string, description: string, link?: strin
     read: false,
   });
 };
-

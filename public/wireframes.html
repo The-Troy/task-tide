@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Wireframes - TaskTide</title>
+    <style>
+        body { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; margin: 0; padding: 0; background-color: #f0f2f5; color: #1c1e21; }
+        .container { max-width: 1400px; margin: 20px auto; padding: 20px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.1); }
+        h1 { text-align: center; color: #673AB7; margin-bottom: 20px; font-size: 2em; }
+        h2 { color: #673AB7; border-bottom: 2px solid #EDE7F6; padding-bottom: 10px; margin-top: 30px; font-size: 1.6em; }
+        h3 { color: #3F51B5; margin-top: 25px; font-size: 1.3em; }
+        .page-section { border: 1px solid #ddd; margin-bottom: 25px; padding: 20px; border-radius: 6px; background-color: #f9f9f9; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .page-title { font-size: 1.2em; font-weight: bold; color: #1d2129; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px solid #e0e0e0;}
+        .page-title code { background-color: #e7f3ff; padding: 2px 5px; border-radius: 3px; font-family: monospace; color: #00529B; }
+        .component { border: 1px dashed #3F51B5; margin: 15px 0; padding: 15px; border-radius: 4px; background-color: #f0f8ff; }
+        .component-title { font-weight: bold; color: #3F51B5; margin-bottom: 10px; font-size: 1.1em; }
+        .element-list { list-style: disc; margin-left: 20px; padding-left: 5px; color: #4b4f56; }
+        .element-list li { margin-bottom: 5px; }
+        .layout-shell { display: flex; border: 2px solid #4A148C; padding: 15px; background-color: #f3e5f5; border-radius: 5px; margin-top: 15px; }
+        .sidebar-shell { width: 220px; background-color: #EDE7F6; padding: 15px; margin-right: 15px; border-radius: 4px;}
+        .header-shell { min-height: 60px; background-color: #E3F2FD; padding: 15px; margin-bottom: 15px; border-radius: 4px; display: flex; align-items: center; justify-content: space-between; }
+        .main-content-shell { flex-grow: 1; background-color: #e8f0fe; padding: 15px; border-radius: 4px; min-height: 150px; display: flex; align-items: center; justify-content: center; }
+        .note { font-size: 0.9em; color: #606770; margin-top: 10px; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 10px; }
+        .card-item { background-color: #ffffff; border: 1px solid #d1d9de; padding: 12px; border-radius: 4px; text-align: center; box-shadow: 0 1px 1px rgba(0,0,0,0.04); }
+        .sub-section { margin-left: 20px; padding-left: 15px; border-left: 2px solid #b39ddb; margin-top:15px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TaskTide App Wireframes</h1>
+
+        <h2>Public Area</h2>
+        <div class="page-section">
+            <div class="page-title">Landing Page (<code>/</code>)</div>
+            <div class="component">
+                <div class="component-title">Header</div>
+                <ul class="element-list">
+                    <li>App Logo & Name ("TaskTide")</li>
+                    <li>"Go to App" Button (links to <code>/dashboard</code>)</li>
+                </ul>
+            </div>
+            <div class="component">
+                <div class="component-title">Main Content</div>
+                <ul class="element-list">
+                    <li>Welcome Message & App Description</li>
+                    <li>Illustrative Image</li>
+                    <li>"Get Started" Button (links to <code>/dashboard</code>)</li>
+                </ul>
+            </div>
+            <div class="component">
+                <div class="component-title">Footer</div>
+                <ul class="element-list">
+                    <li>Copyright Information</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>Authenticated App Area</h2>
+        <div class="page-section">
+            <div class="page-title">Overall App Layout Shell</div>
+            <div class="note">This structure wraps all authenticated pages.</div>
+            <div class="layout-shell">
+                <div class="sidebar-shell">
+                    <div class="component-title">Persistent Sidebar</div>
+                    <ul class="element-list">
+                        <li>App Logo</li>
+                        <li>Dashboard Link</li>
+                        <li>Documents Link</li>
+                        <li>Groups Link</li>
+                        <li>Notifications Link</li>
+                        <li>Settings Link</li>
+                    </ul>
+                </div>
+                <div style="flex-grow: 1; display: flex; flex-direction: column;">
+                    <div class="header-shell">
+                        <div class="component-title" style="margin-bottom:0;">Persistent Header</div>
+                        <div>Sidebar Toggle (Mobile) | Notifications Icon | UserNav (Avatar, Menu)</div>
+                    </div>
+                    <div class="main-content-shell">
+                        <div class="component-title" style="margin-bottom:0;">Page-Specific Content Renders Here</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-section">
+            <div class="page-title">Dashboard Page (<code>/dashboard</code>)</div>
+            <div class="component">
+                <div class="component-title">Welcome Section</div>
+                <ul class="element-list">
+                    <li>Welcome Message (e.g., "Welcome back, [User Name]!")</li>
+                    <li>User's Role Display</li>
+                </ul>
+            </div>
+            <div class="component">
+                <div class="component-title">Quick Stats (Cards)</div>
+                 <div class="card-grid">
+                    <div class="card-item">Total Documents Link</div>
+                    <div class="card-item">Active Groups Link</div>
+                    <div class="card-item">Unread Notifications Link</div>
+                </div>
+            </div>
+            <div class="component">
+                <div class="component-title">Quick Actions (Links/Buttons)</div>
+                 <div class="card-grid">
+                    <div class="card-item">Browse Documents</div>
+                    <div class="card-item">Manage Groups</div>
+                    <div class="card-item">Update Settings</div>
+                </div>
+            </div>
+            <div class="component">
+                <div class="component-title">Study Tip of the Day</div>
+                <ul class="element-list">
+                    <li>Illustrative Image</li>
+                    <li>Tip Text</li>
+                </ul>
+            </div>
+        </div>
+        
+        <h3>Documents Section</h3>
+        <div class="page-section">
+            <div class="page-title">Semesters List Page (<code>/documents</code>)</div>
+            <div class="component">
+                <div class="component-title">Header: "Document Browser"</div>
+                 <p>Select a semester to view its units and documents.</p>
+            </div>
+            <div class="component">
+                <div class="component-title">List/Grid of Semester Cards</div>
+                <div class="card-grid">
+                    <div class="card-item">Semester 1 Card</div>
+                    <div class="card-item">Semester 2 Card</div>
+                    <div class="card-item">...</div>
+                </div>
+                <div class="note">Each card links to <code>/documents/[semesterId]</code>.</div>
+            </div>
+        </div>
+
+        <div class="page-section">
+            <div class="page-title">Units List Page (<code>/documents/[semesterId]</code>)</div>
+            <div class="component">
+                <div class="component-title">Header</div>
+                 <ul class="element-list">
+                    <li>"Back to Semesters" Link</li>
+                    <li>Page Title: "[Semester Name] Units"</li>
+                     <p>Browse units available in [Semester Name].</p>
+                </ul>
+            </div>
+            <div class="component">
+                <div class="component-title">List/Grid of Unit Cards</div>
+                 <div class="card-grid">
+                    <div class="card-item">Unit 101 Card</div>
+                    <div class="card-item">Unit 102 Card</div>
+                    <div class="card-item">...</div>
+                </div>
+                <div class="note">Each card links to <code>/documents/[semesterId]/[unitId]</code>.</div>
+            </div>
+        </div>
+        
+        <div class="page-section">
+            <div class="page-title">Documents List Page (<code>/documents/[semesterId]/[unitId]</code>)</div>
+            <div class="component">
+                <div class="component-title">Header</div>
+                 <ul class="element-list">
+                    <li>"Back to [Semester Name] Units" Link</li>
+                    <li>Page Title: "[Unit Name]"</li>
+                    <p>Documents for [Unit Name] in [Semester Name].</p>
+                </ul>
+            </div>
+            <div class="component">
+                <div class="component-title">Grid of Document Cards</div>
+                 <div class="card-grid">
+                    <div class="card-item">Doc 1 Card (Name, Type, Date, Size)</div>
+                    <div class="card-item">Doc 2 Card</div>
+                    <div class="card-item">...</div>
+                </div>
+                <div class="note">Each card links to <code>/documents/view/[docId]</code> or an external URL. Message if no documents.</div>
+            </div>
+        </div>
+
+        <div class="page-section">
+            <div class="page-title">Document Viewer Page (<code>/documents/view/[docId]</code>)</div>
+            <div class="component">
+                <div class="component-title">Header</div>
+                 <ul class="element-list">
+                    <li>"Back to [Unit Name] Documents" Link</li>
+                    <li>Document Title</li>
+                    <li>Badges: Semester, Unit, Document Type</li>
+                    <li>Download Button</li>
+                </ul>
+            </div>
+            <div class="component">
+                <div class="component-title">Document Display Area</div>
+                <p>Embedded PDF Viewer (if PDF) / Message for unsupported types / Link for external resources.</p>
+                <div class="note">Message if document not found.</div>
+            </div>
+        </div>
+
+        <h3>Groups Section</h3>
+        <div class="page-section">
+            <div class="page-title">Groups Page (<code>/groups</code>)</div>
+            <div class="component">
+                <div class="component-title">Header: "Assignment Groups"</div>
+                <p>Description based on user role (Student vs. Class Rep).</p>
+            </div>
+            <div class="component" style="background-color: #fff3e0;">
+                <div class="component-title">Group Setup Form (Class Representative Only)</div>
+                <ul class="element-list">
+                    <li>Assignment Name Input</li>
+                    <li>Maximum Group Size Input</li>
+                    <li>Semester Dropdown</li>
+                    <li>Unit Dropdown (filtered by semester)</li>
+                    <li>"Create Group" Button</li>
+                </ul>
+            </div>
+            <div class="component">
+                <div class="component-title">Search Bar</div>
+                <p>Input to filter groups by name or unit.</p>
+            </div>
+            <div class="component">
+                <div class="component-title">Tabs Navigation</div>
+                <ul class="element-list">
+                    <li>"Available to Join" Tab</li>
+                    <li>"My Groups / Created" Tab</li>
+                </ul>
+            </div>
+            <div class="sub-section">
+                <div class="page-title" style="font-size:1.1em; border:none; margin-bottom:5px;">Content for selected tab:</div>
+                <div class="component">
+                    <div class="component-title">Grid of Group Cards</div>
+                    <div class="card-grid">
+                        <div class="card-item">Group Card: Name, Size, Members, Creator, Unit/Sem, Join/Manage Btn</div>
+                        <div class="card-item">...</div>
+                    </div>
+                    <div class="note">Message if no groups match criteria.</div>
+                </div>
+            </div>
+        </div>
+
+        <h3>Notifications Section</h3>
+        <div class="page-section">
+            <div class="page-title">Notifications Page (<code>/notifications</code>)</div>
+            <div class="component">
+                <div class="component-title">Header: "Notifications"</div>
+                <ul class="element-list">
+                    <li>"Mark all as read" Button (if unread notifications exist)</li>
+                </ul>
+            </div>
+            <div class="component">
+                <div class="component-title">List of Notification Items</div>
+                <div class="card-grid" style="grid-template-columns: 1fr;">
+                    <div class="card-item" style="text-align:left;">Notification: Title, Description, Timestamp (relative), Read/Unread Badge, "Mark as Read" Button, "View Details" Link.</div>
+                    <div class="card-item" style="text-align:left;">...</div>
+                </div>
+                <div class="note">Message if no notifications. Items styled differently if read.</div>
+            </div>
+        </div>
+        
+        <h3>Settings Section</h3>
+        <div class="page-section">
+            <div class="page-title">Settings Page (<code>/settings</code>)</div>
+            <div class="component">
+                <div class="component-title">Header: "Settings"</div>
+                 <p>Manage your account preferences and application settings.</p>
+            </div>
+            <div class="component" style="background-color: #e8f5e9;">
+                <div class="component-title">Role Switcher Card (Demo Feature)</div>
+                <ul class="element-list">
+                    <li>Radio Button: Student</li>
+                    <li>Radio Button: Class Representative</li>
+                    <li>Display Current Role</li>
+                </ul>
+            </div>
+            <div class="component">
+                <div class="component-title">Profile Information Card</div>
+                <ul class="element-list">
+                    <li>Avatar Image + "Change Avatar" Button</li>
+                    <li>Input: Full Name</li>
+                    <li>Input: Email Address (Read-only)</li>
+                    <li>"Save Profile Changes" Button</li>
+                </ul>
+            </div>
+            <div class="component">
+                <div class="component-title">Account Security Card</div>
+                <ul class="element-list">
+                    <li>Input: Current Password</li>
+                    <li>Input: New Password</li>
+                    <li>Input: Confirm New Password</li>
+                    <li>"Change Password" Button</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+    

@@ -24,11 +24,15 @@ export interface Unit {
   id: string;
   name: string;
   semesterId: string;
+  description?: string; // Optional description for unit cards
 }
 
 export interface Semester {
   id: string;
-  name: string; // e.g., "Semester 1", "Semester 2"
+  name: string; // e.g., "Semester 1", "Advanced Studies Server"
+  isPublic: boolean;
+  createdBy: Pick<User, 'id' | 'name'>;
+  // accessCode?: string; // For future private semester access
 }
 
 export interface AssignmentGroup {
