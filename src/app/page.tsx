@@ -43,7 +43,7 @@ export default function LandingPage() {
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-6">
             <Image 
-              src="/thumbnail.jpg" 
+              src="https://placehold.co/600x300.png" 
               alt="TaskTide illustration" 
               width={600} 
               height={300}
