@@ -43,7 +43,7 @@ export default function LandingPage() {
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-6">
             <Image 
-              src="/thumbnail.jpg" 
+              src="/images/hero-image.jpg"
               alt="TaskTide illustration" 
               width={600} 
               height={300}

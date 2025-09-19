@@ -2,6 +2,9 @@
 
 This is a NextJS starter in Firebase Studio.
 
+TaskTide is a simple, collaborative task management web app designed to help teams stay organized and productive.  
+Deployed live at **[tasktid.netlify.app](https://tasktid.netlify.app)** 🚀
+
 To get started, take a look at src/app/page.tsx.
 
 
