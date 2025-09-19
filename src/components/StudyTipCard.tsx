@@ -6,84 +6,51 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
 const fallbackTips = [
-  { text: "💜 Stay consistent — even small steps lead to big results.", author: "TaskTide Team 💜" },
-  { text: "📚 Review your notes within 24 hours to boost retention.", author: "TaskTide Team 💜" },
-  { text: "⏳ Break study sessions into 25-minute chunks — try the Pomodoro Technique 🍅.", author: "TaskTide Team 💜" },
-  { text: "🗣️ Teach what you learn — explaining strengthens memory.", author: "TaskTide Team 💜" },
-  { text: "🎯 Focus on mastering concepts, not just passing exams.", author: "TaskTide Team 💜" },
-  { text: "📝 Write down your goals — clarity fuels motivation.", author: "TaskTide Team 💜" },
-  { text: "📖 Read a little every day — knowledge compounds like interest.", author: "TaskTide Team 💜" },
-  { text: "🔄 Mistakes are proof you’re trying — keep going!", author: "TaskTide Team 💜" },
-  { text: "📅 Plan your week every Sunday — start strong 💪.", author: "TaskTide Team 💜" },
-  { text: "🛌 Rest is productive — your brain consolidates memory while you sleep.", author: "TaskTide Team 💜" },
-  { text: "🤝 Collaboration over competition — lift others as you climb.", author: "TaskTide Team 💜" },
-  { text: "🌱 Growth takes time — water your efforts daily.", author: "TaskTide Team 💜" },
-  { text: "💡 Curiosity is your superpower — ask why, explore how.", author: "TaskTide Team 💜" },
-  { text: "🚀 Aim for progress, not perfection.", author: "TaskTide Team 💜" },
-  { text: "📂 Keep your notes organized — your future self will thank you.", author: "TaskTide Team 💜" },
-  { text: "⏱️ Start early — future deadlines feel lighter.", author: "TaskTide Team 💜" },
-  { text: "🏆 Small daily wins add up to big achievements.", author: "TaskTide Team 💜" },
-  { text: "🎨 Creativity thrives when you take breaks — go for a walk 🚶.", author: "TaskTide Team 💜" },
-  { text: "🧠 Treat your brain like a muscle — train it with challenges.", author: "TaskTide Team 💜" },
-  { text: "🧩 Break complex problems into smaller pieces.", author: "TaskTide Team 💜" },
-  { text: "🎧 Listen to focus music — your brain loves rhythm 🎶.", author: "TaskTide Team 💜" },
-  { text: "💻 Learn a new skill online — knowledge is everywhere now.", author: "TaskTide Team 💜" },
-  { text: "📊 Track your progress — see how far you’ve come.", author: "TaskTide Team 💜" },
-  { text: "🔥 Motivation gets you started, discipline keeps you going.", author: "TaskTide Team 💜" },
-  { text: "🫶 Celebrate even the tiniest wins — you’re building momentum.", author: "TaskTide Team 💜" },
-  { text: "🪞 Compare yourself only to who you were yesterday.", author: "TaskTide Team 💜" },
-  { text: "🏖️ Take mindful breaks — balance prevents burnout.", author: "TaskTide Team 💜" },
-  { text: "🔎 Seek feedback — growth hides in other perspectives.", author: "TaskTide Team 💜" },
-  { text: "💜 Believe in yourself even when results are slow.", author: "TaskTide Team 💜" },
-  { text: "🧃 Stay hydrated — your brain works better with water.", author: "TaskTide Team 💜" },
-  { text: "🪴 Plant seeds of effort daily — your future blooms 🌸.", author: "TaskTide Team 💜" },
-  { text: "🛠️ Build habits, not just motivation.", author: "TaskTide Team 💜" },
-  { text: "📑 Summarize after reading — retention skyrockets 🚀.", author: "TaskTide Team 💜" },
-  { text: "🎓 Education is an investment — treat it seriously.", author: "TaskTide Team 💜" },
-  { text: "💬 Ask questions — curiosity is free wisdom.", author: "TaskTide Team 💜" },
-  { text: "📆 Consistency beats cramming every single time.", author: "TaskTide Team 💜" },
-  { text: "🖊️ Rewrite notes in your own words — your brain loves this.", author: "TaskTide Team 💜" },
-  { text: "🏃 Move a little before studying — boost brain activity.", author: "TaskTide Team 💜" },
-  { text: "🌟 You don’t have to be perfect to be proud.", author: "TaskTide Team 💜" },
-  { text: "🎯 One focused hour beats three distracted ones.", author: "TaskTide Team 💜" },
-  { text: "📚 Read widely — connect dots across fields.", author: "TaskTide Team 💜" },
-  { text: "🪞 Reflect weekly — what worked, what didn’t?", author: "TaskTide Team 💜" },
-  { text: "⚡ Act on ideas quickly — momentum fades fast.", author: "TaskTide Team 💜" },
-  { text: "🔐 Protect your time like treasure — it is!", author: "TaskTide Team 💜" },
-  { text: "🧘 Breathe deeply before exams — calm fuels clarity.", author: "TaskTide Team 💜" },
-  { text: "🎙️ Explain concepts aloud — you’ll find gaps faster.", author: "TaskTide Team 💜" },
-  { text: "📖 A page a day still finishes a book.", author: "TaskTide Team 💜" },
-  { text: "💜 You’re smarter than you think — keep going!", author: "TaskTide Team 💜" },
-  { text: "🌍 Learn something outside your field — expand your mind.", author: "TaskTide Team 💜" },
-  { text: "🎓 The best project you can work on is yourself.", author: "TaskTide Team 💜" },
-  { text: "⏲️ Deadlines are motivators — use them wisely.", author: "TaskTide Team 💜" },
-  { text: "🌞 Mornings are your brain’s prime time — use them.", author: "TaskTide Team 💜" },
-  { text: "🧠 Your brain is plastic — train it, reshape it.", author: "TaskTide Team 💜" },
-  { text: "📋 Prioritize — not all tasks deserve equal attention.", author: "TaskTide Team 💜" },
-  { text: "📢 Share what you learn — knowledge grows when shared.", author: "TaskTide Team 💜" },
-  { text: "💡 Think in systems, not just goals.", author: "TaskTide Team 💜" },
-  { text: "🔄 If you fail, try again differently — iterate.", author: "TaskTide Team 💜" },
-  { text: "🌸 Rest is part of the process, not a break from it.", author: "TaskTide Team 💜" },
-  { text: "🛑 Say no to distractions — say yes to your goals.", author: "TaskTide Team 💜" },
-  { text: "🌊 Ride the waves of energy — work when you feel sharp.", author: "TaskTide Team 💜" },
-  { text: "🗓️ Schedule breaks like appointments — they matter.", author: "TaskTide Team 💜" },
-  { text: "🖥️ Learn one new shortcut every week — save time.", author: "TaskTide Team 💜" },
-  { text: "⚖️ Balance ambition with patience — success compounds.", author: "TaskTide Team 💜" },
-  { text: "💬 Find a mentor — learn from their journey.", author: "TaskTide Team 💜" },
-  { text: "🏗️ Build projects — applying knowledge cements it.", author: "TaskTide Team 💜" },
-  { text: "📦 Done is better than perfect — ship your work.", author: "TaskTide Team 💜" },
-  { text: "✨ Every day is a chance to rewrite your story.", author: "TaskTide Team 💜" },
-  { text: "🌙 Sleep well — tired brains don’t perform miracles.", author: "TaskTide Team 💜" },
-  { text: "🧩 Learn actively — quiz yourself, don’t just reread.", author: "TaskTide Team 💜" },
-  { text: "📈 Track habits — data keeps you honest.", author: "TaskTide Team 💜" },
-  { text: "💜 Your effort today is building tomorrow’s you.", author: "TaskTide Team 💜" },
-  { text: "🕰️ Don’t wait for motivation — start, and motivation follows.", author: "TaskTide Team 💜" },
-  { text: "🎶 Study playlists boost focus — try lo-fi or classical.", author: "TaskTide Team 💜" },
-  { text: "🏔️ Big goals? Break them into daily climbs.", author: "TaskTide Team 💜" },
-  { text: "🎯 Focus is the new superpower — eliminate noise.", author: "TaskTide Team 💜" },
-  { text: "💡 Document your learnings — build your second brain.", author: "TaskTide Team 💜" },
-  { text: "👣 Start small, start now — momentum builds confidence.", author: "TaskTide Team 💜" },
-  { text: "🔑 Consistency unlocks results — don’t give up.", author: "TaskTide Team 💜" },
+{ text: "🌟 Your learning journey is unique — trust the process.", author: "TaskTide Team 💜" },
+  { text: "🚦 Start where you are, use what you have, do what you can.", author: "TaskTide Team 💜" },
+  { text: "🖋️ Journaling your progress makes you more mindful.", author: "TaskTide Team 💜" },
+  { text: "🔍 Focus on quality over quantity — deep work wins.", author: "TaskTide Team 💜" },
+  { text: "🎯 One goal at a time — multitasking drains focus.", author: "TaskTide Team 💜" },
+  { text: "🧃 Water + Brain = Productivity Boost 💡", author: "TaskTide Team 💜" },
+  { text: "🏁 Done is better than perfect — progress matters.", author: "TaskTide Team 💜" },
+  { text: "🧠 Stretch your brain with a puzzle or riddle today.", author: "TaskTide Team 💜" },
+  { text: "💻 Practice daily — coding is a muscle too!", author: "TaskTide Team 💜" },
+  { text: "📖 Slow down when reading — understanding > speed.", author: "TaskTide Team 💜" },
+  { text: "🌱 Mistakes are fertilizer — they help you grow.", author: "TaskTide Team 💜" },
+  { text: "🎧 Use soundscapes or white noise to focus better.", author: "TaskTide Team 💜" },
+  { text: "🧭 Know your why — it fuels your study sessions.", author: "TaskTide Team 💜" },
+  { text: "⏰ The best time to start was yesterday. The next best time is now.", author: "TaskTide Team 💜" },
+  { text: "🧘 Calm mind = sharp mind — breathe for a minute before you start.", author: "TaskTide Team 💜" },
+  { text: "📆 Build streaks — consistency is addictive.", author: "TaskTide Team 💜" },
+  { text: "🎨 Add color to your notes — visual memory is powerful.", author: "TaskTide Team 💜" },
+  { text: "🚀 Small consistent actions beat rare bursts of effort.", author: "TaskTide Team 💜" },
+  { text: "💬 Teach a friend — you'll learn twice.", author: "TaskTide Team 💜" },
+  { text: "📦 Break big projects into micro-tasks and celebrate each step 🎉.", author: "TaskTide Team 💜" },
+  { text: "🖼️ Visualize success — your brain works toward what it sees.", author: "TaskTide Team 💜" },
+  { text: "🔑 Preparation unlocks confidence before exams.", author: "TaskTide Team 💜" },
+  { text: "🧃 Snack smart — fuel your focus, not just your hunger.", author: "TaskTide Team 💜" },
+  { text: "📚 Reread with intention — look for something new each time.", author: "TaskTide Team 💜" },
+  { text: "🧠 Keep a 'question notebook' — curiosity grows knowledge.", author: "TaskTide Team 💜" },
+  { text: "🎯 Focused action today makes tomorrow easier.", author: "TaskTide Team 💜" },
+  { text: "🌙 A good night’s sleep is your secret study hack.", author: "TaskTide Team 💜" },
+  { text: "🕰️ Start early, finish early — reward yourself with free time.", author: "TaskTide Team 💜" },
+  { text: "💡 Experiment with study methods until one clicks.", author: "TaskTide Team 💜" },
+  { text: "🎶 Try instrumental playlists — lyrics can distract.", author: "TaskTide Team 💜" },
+  { text: "📖 Repetition is the mother of learning.", author: "TaskTide Team 💜" },
+  { text: "🚴 Exercise boosts memory and learning ability 🧠.", author: "TaskTide Team 💜" },
+  { text: "🌍 Learn about something outside your comfort zone today.", author: "TaskTide Team 💜" },
+  { text: "🧩 Keep a balance — mental health fuels productivity.", author: "TaskTide Team 💜" },
+  { text: "📌 Write down distractions — deal with them later.", author: "TaskTide Team 💜" },
+  { text: "✨ Every day is a fresh page — write something amazing.", author: "TaskTide Team 💜" },
+  { text: "🏗️ Build knowledge brick by brick, day by day.", author: "TaskTide Team 💜" },
+  { text: "🌞 Morning review sets the tone for the day.", author: "TaskTide Team 💜" },
+  { text: "📊 Measure your progress weekly — celebrate growth!", author: "TaskTide Team 💜" },
+  { text: "🧠 Memory improves with active recall — quiz yourself often.", author: "TaskTide Team 💜" },
+  { text: "🔋 Recharge before you burn out — breaks are batteries.", author: "TaskTide Team 💜" },
+  { text: "🚧 Hard work compounds — you’re building a future you.", author: "TaskTide Team 💜" },
+  { text: "📎 Link new ideas to what you already know — memory loves connections.", author: "TaskTide Team 💜" },
+  { text: "🧃 Stay refreshed — brain fog is just dehydration in disguise.", author: "TaskTide Team 💜" },
+  { text: "🎯 Your effort today is an investment in tomorrow.", author: "TaskTide Team 💜" },
 ];
 
 const gradients = [
@@ -95,17 +62,31 @@ const gradients = [
   "bg-gradient-to-r from-rose-100 via-purple-100 to-sky-100",
 ];
 
+// ✅ List of images (add them in /public/images/study-tips/)
+const images = [
+  "/images/study-tips/tip1.jpg",
+  "/images/study-tips/tip2.jpg",
+  "/images/study-tips/tip3.jpg",
+  "/images/study-tips/tip4.jpg",
+  "/images/study-tips/tip5.jpg",
+  "/images/study-tips/tip6.jpg",
+];
+
 export default function StudyTipCard() {
   const [quote, setQuote] = useState(fallbackTips[0].text);
   const [author, setAuthor] = useState(fallbackTips[0].author);
   const [gradient, setGradient] = useState(gradients[0]);
+  const [image, setImage] = useState(images[0]);
 
   function getRandomQuote() {
     const randomQuote = fallbackTips[Math.floor(Math.random() * fallbackTips.length)];
     const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
+    const randomImage = images[Math.floor(Math.random() * images.length)];
+
     setQuote(randomQuote.text);
     setAuthor(randomQuote.author);
     setGradient(randomGradient);
+    setImage(randomImage);
   }
 
   useEffect(() => {
@@ -128,11 +109,11 @@ export default function StudyTipCard() {
 
       <div className="flex flex-col sm:flex-row items-start gap-4">
         <Image
-          src="/images/study-tip.jpg"
+          src={image}
           alt="Study tip illustration"
-          width={250}
-          height={180}
-          className="rounded object-cover shadow-md"
+          width={200}
+          height={200}
+          className="rounded-full object-cover shadow-md"
         />
         <AnimatePresence mode="wait">
           <motion.div
