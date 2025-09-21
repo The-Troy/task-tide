@@ -19,6 +19,10 @@ export function GroupCard({ group, onGroupJoinedOrUpdated }: GroupCardProps) {
   const { currentUser, role, joinGroup } = useAppContext();
   const { toast } = useToast();
 
+  if (!currentUser) {
+    return null;
+  }
+
   const isMember = group.members.some(member => member.id === currentUser.id);
   const isFull = group.members.length >= group.maxSize;
   const canJoin = role === 'student' && !isMember && !isFull;

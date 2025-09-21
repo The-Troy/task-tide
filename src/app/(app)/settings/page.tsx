@@ -16,6 +16,10 @@ export default function SettingsPage() {
   const { currentUser } = useAppContext();
   const { toast } = useToast();
 
+  if (!currentUser) {
+    return null;
+  }
+
   const handleSaveChanges = () => {
     toast({
       title: "Profile Updated",

@@ -23,7 +23,7 @@ export default function LandingPage() {
           <span className="font-headline">TaskTide</span>
         </div>
         <Button asChild variant="outline">
-          <Link href="/dashboard">
+          <Link href="/login">
             Go to App
             <LogIn className="ml-2 h-4 w-4" />
           </Link>
@@ -56,7 +56,7 @@ export default function LandingPage() {
               and stay updated with notifications.
             </p>
             <Button size="lg" asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              <Link href="/dashboard">
+              <Link href="/login">
                 Get Started
                 <LogIn className="ml-2 h-5 w-5" />
               </Link>

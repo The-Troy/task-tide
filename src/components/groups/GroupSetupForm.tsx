@@ -44,6 +44,10 @@ export function GroupSetupForm({ onGroupCreated, initialSemesterId, initialUnitI
   
   const [selectedSemester, setSelectedSemester] = React.useState<string>(initialSemesterId || "");
 
+  if (!currentUser) {
+    return null;
+  }
+
   const form = useForm<GroupFormValues>({
     resolver: zodResolver(groupFormSchema),
     defaultValues: {

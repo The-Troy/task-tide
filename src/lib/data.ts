@@ -17,6 +17,9 @@ export const mockUserClassRep: User = {
   avatarUrl: 'https://placehold.co/100x100.png',
 };
 
+// Store for registered users
+export let registeredUsers: User[] = [mockUserStudent, mockUserClassRep];
+
 export let semesters: Semester[] = [
   { id: 'sem1', name: 'Foundational Year Studies', isPublic: true, createdBy: { id: mockUserClassRep.id, name: mockUserClassRep.name } },
   { id: 'sem2', name: 'Intermediate Group Projects', isPublic: true, createdBy: { id: mockUserClassRep.id, name: mockUserClassRep.name } },
@@ -103,4 +106,19 @@ export const addNotification = (title: string, description: string, link?: strin
     timestamp: new Date().toISOString(),
     read: false,
   });
+};
+
+// User management functions
+export const getUserByEmail = (email: string): User | undefined => {
+  return registeredUsers.find(user => user.email === email);
+};
+
+export const addUser = (userData: Omit<User, 'id' | 'avatarUrl'>): User => {
+  const newUser: User = {
+    ...userData,
+    id: `user_${Date.now()}`,
+    avatarUrl: 'https://placehold.co/100x100.png',
+  };
+  registeredUsers.push(newUser);
+  return newUser;
 };

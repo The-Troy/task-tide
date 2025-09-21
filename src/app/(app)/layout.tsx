@@ -18,9 +18,22 @@ import { Button } from "@/components/ui/button";
 import { Bell, LogOut } from "lucide-react";
 import Link from 'next/link';
 import { useAppContext } from '@/hooks/useAppContext';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { currentUser } = useAppContext();
+  const { currentUser, isAuthenticated } = useAppContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return null; // or a loading spinner
+  }
 
   return (
     <SidebarProvider defaultOpen >
