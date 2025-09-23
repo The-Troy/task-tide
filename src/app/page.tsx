@@ -113,7 +113,7 @@ export default function LandingPage() {
           <span className="font-headline">TaskTide</span>
         </div>
         <Button asChild variant="outline">
-          <Link href="/dashboard">
+          <Link href="/login">
             Go to App
             <LogIn className="ml-2 h-4 w-4" />
           </Link>
@@ -266,6 +266,16 @@ export default function LandingPage() {
             />
             <Button type="submit" className="bg-primary hover:bg-primary/90">
               Subscribe
+            <p className="text-center text-foreground">
+              TaskTide helps students and class representatives streamline their academic workflow. 
+              Access documents by semester and unit, view PDFs in-app, manage assignment groups, 
+              and stay updated with notifications.
+            </p>
+            <Button size="lg" asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Link href="/login">
+                Get Started
+                <LogIn className="ml-2 h-5 w-5" />
+              </Link>
             </Button>
           </form>
         </motion.section>

@@ -1,20 +1,22 @@
 
 "use client";
 
-import { RoleSwitcher } from "@/components/settings/RoleSwitcher";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { useAppContext } from "@/hooks/useAppContext";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, UserCircle, ShieldAlert } from "lucide-react";
+import { Settings, UserCircle, UserCog } from "lucide-react";
 import Image from "next/image";
 
 export default function SettingsPage() {
   const { currentUser } = useAppContext();
   const { toast } = useToast();
+
+  if (!currentUser) {
+    return null;
+  }
 
   const handleSaveChanges = () => {
     toast({
@@ -41,9 +43,32 @@ export default function SettingsPage() {
         </p>
       </header>
 
-      <RoleSwitcher />
-
-      <Separator />
+      {/* Role Display */}
+      <Card className="shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-2xl font-headline flex items-center text-primary">
+            <UserCog className="mr-2 h-6 w-6"/>
+            Current Role
+          </CardTitle>
+          <CardDescription>
+            You are currently logged in with the following role.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-3 p-4 bg-muted rounded-lg">
+            <div className="w-3 h-3 bg-primary rounded-full"></div>
+            <span className="text-lg font-semibold capitalize">
+              {currentUser.role.replace('_', ' ')}
+            </span>
+          </div>
+          <p className="mt-3 text-sm text-muted-foreground">
+            {currentUser.role === 'student' 
+              ? 'As a student, you can join groups and access documents.'
+              : 'As a class representative, you can create and manage groups.'
+            }
+          </p>
+        </CardContent>
+      </Card>
 
       <Card className="shadow-lg">
         <CardHeader>
@@ -76,34 +101,6 @@ export default function SettingsPage() {
           </div>
           <Button onClick={handleSaveChanges} className="bg-primary hover:bg-primary/90 text-primary-foreground">
             Save Profile Changes
-          </Button>
-        </CardContent>
-      </Card>
-      
-      <Separator />
-
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl font-headline flex items-center text-primary">
-             <ShieldAlert className="mr-2 h-6 w-6"/> Account Security
-          </CardTitle>
-          <CardDescription>Manage your account security settings.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-           <div>
-              <Label htmlFor="current-password">Current Password</Label>
-              <Input id="current-password" type="password" className="mt-1" />
-            </div>
-            <div>
-              <Label htmlFor="new-password">New Password</Label>
-              <Input id="new-password" type="password" className="mt-1" />
-            </div>
-             <div>
-              <Label htmlFor="confirm-password">Confirm New Password</Label>
-              <Input id="confirm-password" type="password" className="mt-1" />
-            </div>
-          <Button onClick={handleChangePassword} variant="destructive">
-            Change Password
           </Button>
         </CardContent>
       </Card>

@@ -10,6 +10,10 @@ import StudyTipCard from "@/components/StudyTipCard";
 export default function DashboardPage() {
   const { currentUser } = useAppContext();
 
+  if (!currentUser) {
+    return null;
+  }
+
   const quickStats = [
     { title: "Total Documents", value: "125", icon: BookOpen, color: "text-primary", href: "/rooms" },
     { title: "Active Groups", value: "8", icon: Users, color: "text-accent", href: "/rooms" },
