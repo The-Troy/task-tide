@@ -242,43 +242,32 @@ export default function LandingPage() {
           </div>
         </motion.section>
 
-        {/* Newsletter */}
-        <motion.section
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={fadeInUp}
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 200, damping: 15 }}
-          className="max-w-2xl w-full text-center mt-16 p-8 bg-card rounded-2xl shadow-lg"
-        >
-          <h2 className="text-2xl font-bold mb-4 flex items-center justify-center gap-2">
-            <Mail className="h-6 w-6 text-primary" /> Stay Updated
-          </h2>
-          <p className="text-muted-foreground mb-6">
-            Join our newsletter to get updates on new features, tips, and upcoming releases.
-          </p>
-          <form className="flex flex-col sm:flex-row gap-4 justify-center">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="border rounded-xl p-3 w-full sm:w-2/3 focus:outline-none"
-            />
-            <Button type="submit" className="bg-primary hover:bg-primary/90">
-              Subscribe
-            <p className="text-center text-foreground">
-              TaskTide helps students and class representatives streamline their academic workflow. 
-              Access documents by semester and unit, view PDFs in-app, manage assignment groups, 
-              and stay updated with notifications.
-            </p>
-            <Button size="lg" asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
-              <Link href="/login">
-                Get Started
-                <LogIn className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
+      {/* Newsletter */}
+      <motion.section
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={fadeInUp}
+        className="max-w-2xl w-full text-center mt-16 p-8 bg-card rounded-2xl shadow-lg"
+      >
+        <h2 className="text-2xl font-bold mb-4 flex items-center justify-center gap-2">
+          <Mail className="h-6 w-6 text-primary" /> Stay Updated
+        </h2>
+        <p className="text-muted-foreground mb-6">
+          Join our newsletter to get updates on new features, tips, and upcoming releases.
+        </p>
+        <form className="flex flex-col sm:flex-row gap-4 justify-center">
+          <input
+            type="email"
+            placeholder="Enter your email"
+            className="border rounded-xl p-3 w-full sm:w-2/3 focus:outline-none"
+          />
+          <Button type="submit" className="bg-primary hover:bg-primary/90">
+            Subscribe
+          </Button>
           </form>
         </motion.section>
+  
       </main>
 
       {/* Footer */}
@@ -286,13 +275,13 @@ export default function LandingPage() {
         <p className="mb-2">&copy; {currentYear ?? "..."} TaskTide. All rights reserved.</p>
         <div className="flex justify-center gap-6 text-sm">
           <Link href="/privacy" className="hover:underline hover:opacity-80 transition">
-              Privacy Policy
+            Privacy Policy
           </Link>
           <Link href="/terms" className="hover:underline hover:opacity-80 transition">
-              Terms of Service
+            Terms of Service
           </Link>
           <Link href="/contact" className="hover:underline hover:opacity-80 transition">
-              Contact Us
+            Contact Us
           </Link>
         </div>
       </footer>
