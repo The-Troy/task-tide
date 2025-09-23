@@ -15,15 +15,22 @@ import {
 import { useAppContext } from "@/hooks/useAppContext";
 import { LogOut, UserCircle } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function UserNav() {
-  const { currentUser } = useAppContext();
+  const { currentUser, logout } = useAppContext();
+  const router = useRouter();
 
   if (!currentUser) {
     return null; 
   }
 
   const fallbackName = currentUser.name ? currentUser.name.substring(0, 2).toUpperCase() : "??";
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+  };
 
   return (
     <DropdownMenu>
@@ -61,10 +68,9 @@ export function UserNav() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
-          {/* In a real app, this would trigger a logout function */}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
