@@ -6,6 +6,8 @@ import { BookOpen, Users, Bell, LayoutGrid } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import StudyTipCard from "@/components/StudyTipCard";
+import { CreateClassroomForm } from "@/components/classroom/CreateClassroomForm";
+import { JoinClassroomForm } from "@/components/classroom/JoinClassroomForm";
 
 export default function DashboardPage() {
   const { currentUser } = useAppContext();
@@ -70,7 +72,18 @@ export default function DashboardPage() {
             Quick Actions
           </CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <CardContent className="space-y-6">
+          {/* Classroom Actions */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            {currentUser.role === 'class_representative' ? (
+              <CreateClassroomForm />
+            ) : (
+              <JoinClassroomForm />
+            )}
+          </div>
+          
+          {/* Other Actions */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Link href="/rooms" className="block p-4 border rounded-lg hover:bg-muted transition-colors">
             <div className="flex items-center mb-1">
               <LayoutGrid className="mr-2 h-5 w-5 text-primary" />
@@ -78,6 +91,7 @@ export default function DashboardPage() {
             </div>
             <p className="text-sm text-muted-foreground">Access documents and groups organized by semester and unit.</p>
           </Link>
+          </div>
         </CardContent>
       </Card>
 

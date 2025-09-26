@@ -54,3 +54,15 @@ export interface NotificationMessage {
   read: boolean;
   link?: string; // Optional link to the relevant item
 }
+
+export interface Classroom {
+  id: string;
+  name: string;
+  year: string;
+  semester: string;
+  joinCode: string;
+  joinLink: string;
+  createdBy: string;
+  members: string[];
+  createdAt: string;
+}
