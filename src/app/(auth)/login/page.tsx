@@ -26,10 +26,7 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const success = login(email, password);
+      const success = await login(email, password);
       
       if (success) {
         toast({
@@ -68,13 +65,22 @@ export default function LoginPage() {
     setEmail(demoEmail);
     setPassword(demoPassword);
     
-    setTimeout(() => {
-      login(demoEmail, demoPassword);
+    setTimeout(async () => {
+      const success = await login(demoEmail, demoPassword);
+      if (success) {
       toast({
         title: `Logged in as ${role.replace('_', ' ')}`,
         description: "Welcome to TaskTide!",
       });
       router.push("/dashboard");
+      } else {
+        toast({
+          title: "Demo Login Failed",
+          description: "Please create a demo account first or use the registration form.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+      }
     }, 500);
   };
 

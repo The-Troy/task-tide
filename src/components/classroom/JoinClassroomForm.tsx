@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/hooks/useAppContext";
 import { UserPlus, CheckCircle, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { findClassroomByJoinCode, addStudentToClassroom, addClassroomToStudent } from "@/lib/firestore";
 import type { Classroom } from "@/lib/types";
 
 const joinSchema = z.object({
@@ -34,32 +35,6 @@ const joinSchema = z.object({
 });
 
 type JoinFormValues = z.infer<typeof joinSchema>;
-
-// Mock classroom data for demonstration
-const mockClassrooms: Classroom[] = [
-  {
-    id: "classroom_1",
-    name: "Bachelor of Information Technology",
-    year: "2025",
-    semester: "Spring",
-    joinCode: "BIT25-ABC",
-    joinLink: "tasktide.app/join/BIT25-ABC",
-    createdBy: "user_classrep_01",
-    members: [],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "classroom_2",
-    name: "Computer Science Fundamentals",
-    year: "2025",
-    semester: "Fall",
-    joinCode: "CSF25-XYZ",
-    joinLink: "tasktide.app/join/CSF25-XYZ",
-    createdBy: "user_classrep_01",
-    members: [],
-    createdAt: new Date().toISOString(),
-  },
-];
 
 interface JoinClassroomFormProps {
   onClassroomJoined?: (classroom: Classroom) => void;
@@ -81,25 +56,21 @@ export function JoinClassroomForm({ onClassroomJoined }: JoinClassroomFormProps)
   });
 
   const findClassroomByCode = async (joinCode: string): Promise<Classroom | null> => {
-    // Simulate Firestore query - in real app, this would query Firebase
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const classroom = mockClassrooms.find(
-      c => c.joinCode.toLowerCase() === joinCode.toLowerCase()
-    );
-    
-    return classroom || null;
+    return await findClassroomByJoinCode(joinCode);
   };
 
   const joinClassroom = async (classroom: Classroom): Promise<void> => {
-    // Simulate Firestore operations - in real app, this would:
-    // 1. Add user ID to classroom members array
-    // 2. Add classroom ID to user's joinedClassrooms array
-    await new Promise(resolve => setTimeout(resolve, 500));
+    if (!currentUser) return;
     
-    // Mock adding user to classroom
-    if (!classroom.members.includes(currentUser?.id || '')) {
-      classroom.members.push(currentUser?.id || '');
+    // Add student to classroom and classroom to student
+    await Promise.all([
+      addStudentToClassroom(classroom.id, currentUser.id),
+      addClassroomToStudent(currentUser.id, classroom.id)
+    ]);
+    
+    // Update local state
+    if (!classroom.members.includes(currentUser.id)) {
+      classroom.members.push(currentUser.id);
     }
   };
 

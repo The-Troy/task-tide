@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/hooks/useAppContext";
 import { Loader2, CheckCircle, AlertCircle, Users, School } from "lucide-react";
 import Link from "next/link";
+import { findClassroomByJoinCode, addStudentToClassroom, addClassroomToStudent } from "@/lib/firestore";
 import type { Classroom } from "@/lib/types";
 
 interface JoinPageProps {
@@ -15,32 +16,6 @@ interface JoinPageProps {
     code: string;
   };
 }
-
-// Mock classroom data for demonstration
-const mockClassrooms: Classroom[] = [
-  {
-    id: "classroom_1",
-    name: "Bachelor of Information Technology",
-    year: "2025",
-    semester: "Spring",
-    joinCode: "BIT25-ABC",
-    joinLink: "tasktide.app/join/BIT25-ABC",
-    createdBy: "user_classrep_01",
-    members: [],
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "classroom_2",
-    name: "Computer Science Fundamentals",
-    year: "2025",
-    semester: "Fall",
-    joinCode: "CSF25-XYZ",
-    joinLink: "tasktide.app/join/CSF25-XYZ",
-    createdBy: "user_classrep_01",
-    members: [],
-    createdAt: new Date().toISOString(),
-  },
-];
 
 export default function JoinClassroomPage({ params }: JoinPageProps) {
   const [classroom, setClassroom] = useState<Classroom | null>(null);
@@ -56,12 +31,7 @@ export default function JoinClassroomPage({ params }: JoinPageProps) {
   useEffect(() => {
     const findClassroom = async () => {
       try {
-        // Simulate API call to find classroom by join code
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        const foundClassroom = mockClassrooms.find(
-          c => c.joinCode.toLowerCase() === params.code.toLowerCase()
-        );
+        const foundClassroom = await findClassroomByJoinCode(params.code);
         
         if (foundClassroom) {
           setClassroom(foundClassroom);
@@ -92,9 +62,6 @@ export default function JoinClassroomPage({ params }: JoinPageProps) {
 
     setIsJoining(true);
     try {
-      // Simulate joining classroom
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
       // Check if already a member
       if (classroom.members.includes(currentUser.id)) {
         toast({
@@ -105,7 +72,13 @@ export default function JoinClassroomPage({ params }: JoinPageProps) {
         return;
       }
 
-      // Mock adding user to classroom
+      // Add student to classroom and classroom to student
+      await Promise.all([
+        addStudentToClassroom(classroom.id, currentUser.id),
+        addClassroomToStudent(currentUser.id, classroom.id)
+      ]);
+      
+      // Update local state
       classroom.members.push(currentUser.id);
       setHasJoined(true);
       

@@ -27,6 +27,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/hooks/useAppContext";
 import { PlusCircle, Copy, ExternalLink, School } from "lucide-react";
+import { createClassroom } from "@/lib/firestore";
 import type { Classroom } from "@/lib/types";
 
 const classroomSchema = z.object({
@@ -66,12 +67,10 @@ export function CreateClassroomForm({ onClassroomCreated }: CreateClassroomFormP
   };
 
   const createClassroom = async (data: ClassroomFormValues): Promise<Classroom> => {
-    // Simulate Firestore operation - in real app, this would use Firebase SDK
     const joinCode = generateJoinCode(data.name, data.year);
     const joinLink = `${window.location.origin}/join/${joinCode}`;
     
-    const classroom: Classroom = {
-      id: `classroom_${Date.now()}`,
+    const classroomData = {
       name: data.name,
       year: data.year,
       semester: data.semester,
@@ -79,13 +78,9 @@ export function CreateClassroomForm({ onClassroomCreated }: CreateClassroomFormP
       joinLink,
       createdBy: currentUser?.id || '',
       members: [],
-      createdAt: new Date().toISOString(),
     };
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    return classroom;
+    return await createClassroom(classroomData);
   };
 
   const onSubmit = async (data: ClassroomFormValues) => {

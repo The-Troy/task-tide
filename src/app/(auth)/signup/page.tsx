@@ -54,10 +54,7 @@ export default function SignUpPage() {
     }
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const success = register({
+      const success = await register({
         name: formData.name,
         email: formData.email,
         password: formData.password,

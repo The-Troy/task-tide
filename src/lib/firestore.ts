@@ -1,99 +1,106 @@
 // Firestore utilities for classroom management
-// This file provides the structure for Firebase integration
-// In a real implementation, you would use the Firebase SDK
+import { 
+  collection, 
+  addDoc, 
+  query, 
+  where, 
+  getDocs, 
+  doc, 
+  updateDoc, 
+  arrayUnion,
+  getDoc
+} from 'firebase/firestore';
+import { db } from './firebase';
 
 import type { Classroom } from './types';
 
-// Mock Firestore operations for demonstration
-// Replace these with actual Firebase SDK calls in production
-
 export const createClassroom = async (classroomData: Omit<Classroom, 'id' | 'createdAt'>): Promise<Classroom> => {
-  // In real implementation:
-  // const docRef = await addDoc(collection(db, 'classrooms'), {
-  //   ...classroomData,
-  //   createdAt: serverTimestamp()
-  // });
-  
-  const classroom: Classroom = {
-    ...classroomData,
-    id: `classroom_${Date.now()}`,
-    createdAt: new Date().toISOString(),
-  };
-  
-  return classroom;
+  try {
+    const docRef = await addDoc(collection(db, 'classrooms'), {
+      ...classroomData,
+      createdAt: new Date().toISOString()
+    });
+    
+    return {
+      ...classroomData,
+      id: docRef.id,
+      createdAt: new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error('Error creating classroom:', error);
+    throw new Error('Failed to create classroom');
+  }
 };
 
 export const findClassroomByJoinCode = async (joinCode: string): Promise<Classroom | null> => {
-  // In real implementation:
-  // const q = query(
-  //   collection(db, 'classrooms'),
-  //   where('joinCode', '==', joinCode)
-  // );
-  // const querySnapshot = await getDocs(q);
-  // return querySnapshot.empty ? null : querySnapshot.docs[0].data() as Classroom;
-  
-  // Mock data for demonstration
-  const mockClassrooms: Classroom[] = [
-    {
-      id: "classroom_1",
-      name: "Bachelor of Information Technology",
-      year: "2025",
-      semester: "Spring",
-      joinCode: "BIT25-ABC",
-      joinLink: "tasktide.app/join/BIT25-ABC",
-      createdBy: "user_classrep_01",
-      members: [],
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: "classroom_2",
-      name: "Computer Science Fundamentals",
-      year: "2025",
-      semester: "Fall",
-      joinCode: "CSF25-XYZ",
-      joinLink: "tasktide.app/join/CSF25-XYZ",
-      createdBy: "user_classrep_01",
-      members: [],
-      createdAt: new Date().toISOString(),
-    },
-  ];
-  
-  return mockClassrooms.find(c => c.joinCode === joinCode) || null;
+  try {
+    const q = query(
+      collection(db, 'classrooms'),
+      where('joinCode', '==', joinCode)
+    );
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      return null;
+    }
+    
+    const doc = querySnapshot.docs[0];
+    return {
+      id: doc.id,
+      ...doc.data()
+    } as Classroom;
+  } catch (error) {
+    console.error('Error finding classroom:', error);
+    throw new Error('Failed to find classroom');
+  }
 };
 
 export const addStudentToClassroom = async (classroomId: string, studentId: string): Promise<void> => {
-  // In real implementation:
-  // const classroomRef = doc(db, 'classrooms', classroomId);
-  // await updateDoc(classroomRef, {
-  //   members: arrayUnion(studentId)
-  // });
-  
-  // Mock operation
-  console.log(`Adding student ${studentId} to classroom ${classroomId}`);
+  try {
+    const classroomRef = doc(db, 'classrooms', classroomId);
+    await updateDoc(classroomRef, {
+      members: arrayUnion(studentId)
+    });
+  } catch (error) {
+    console.error('Error adding student to classroom:', error);
+    throw new Error('Failed to join classroom');
+  }
 };
 
 export const addClassroomToStudent = async (studentId: string, classroomId: string): Promise<void> => {
-  // In real implementation:
-  // const userRef = doc(db, 'users', studentId);
-  // await updateDoc(userRef, {
-  //   joinedClassrooms: arrayUnion(classroomId)
-  // });
-  
-  // Mock operation
-  console.log(`Adding classroom ${classroomId} to student ${studentId}`);
+  try {
+    const userRef = doc(db, 'users', studentId);
+    await updateDoc(userRef, {
+      joinedClassrooms: arrayUnion(classroomId)
+    });
+  } catch (error) {
+    console.error('Error adding classroom to student:', error);
+    throw new Error('Failed to update student record');
+  }
 };
 
 export const getUserClassrooms = async (userId: string): Promise<Classroom[]> => {
-  // In real implementation:
-  // const userDoc = await getDoc(doc(db, 'users', userId));
-  // const joinedClassrooms = userDoc.data()?.joinedClassrooms || [];
-  // 
-  // const classroomPromises = joinedClassrooms.map(id => 
-  //   getDoc(doc(db, 'classrooms', id))
-  // );
-  // const classroomDocs = await Promise.all(classroomPromises);
-  // return classroomDocs.map(doc => doc.data() as Classroom);
-  
-  // Mock data
-  return [];
+  try {
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    const joinedClassrooms = userDoc.data()?.joinedClassrooms || [];
+    
+    if (joinedClassrooms.length === 0) {
+      return [];
+    }
+    
+    const classroomPromises = joinedClassrooms.map((id: string) => 
+      getDoc(doc(db, 'classrooms', id))
+    );
+    const classroomDocs = await Promise.all(classroomPromises);
+    
+    return classroomDocs
+      .filter(doc => doc.exists())
+      .map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      } as Classroom));
+  } catch (error) {
+    console.error('Error getting user classrooms:', error);
+    return [];
+  }
 };
