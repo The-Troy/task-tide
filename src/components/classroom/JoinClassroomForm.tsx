@@ -63,10 +63,8 @@ export function JoinClassroomForm({ onClassroomJoined }: JoinClassroomFormProps)
     if (!currentUser) return;
     
     // Add student to classroom and classroom to student
-    await Promise.all([
-      addStudentToClassroom(classroom.id, currentUser.id),
-      addClassroomToStudent(currentUser.id, classroom.id)
-    ]);
+    await addStudentToClassroom(classroom.id, currentUser.id);
+    await addClassroomToStudent(currentUser.id, classroom.id);
     
     // Update local state
     if (!classroom.members.includes(currentUser.id)) {

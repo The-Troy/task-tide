@@ -7,42 +7,18 @@ Deployed live at **[tasktid.netlify.app](https://tasktid.netlify.app)** 🚀
 
 To get started, take a look at src/app/page.tsx.
 
-## Firebase Setup
+## Demo Authentication
 
-1. Create a Firebase project at https://console.firebase.google.com/
-2. Enable Authentication with Email/Password provider
-3. Create a Firestore database
-4. Copy your Firebase config and update `.env.local`
-5. Set up Firestore security rules (see below)
+The app uses a demo authentication system for easy testing:
 
-### Firestore Security Rules
+**Demo Accounts:**
+- Student: `alex.student@example.com` / `demo123`
+- Class Rep: `casey.rep@example.com` / `demo123`
 
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Users can read/write their own user document
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    
-    // Classroom rules
-    match /classrooms/{classroomId} {
-      // Anyone can read classrooms they're a member of
-      allow read: if request.auth != null && 
-        (request.auth.uid in resource.data.members || 
-         request.auth.uid == resource.data.createdBy);
-      
-      // Only class reps can create classrooms
-      allow create: if request.auth != null;
-      
-      // Only creators can update classrooms
-      allow update: if request.auth != null && 
-        request.auth.uid == resource.data.createdBy;
-    }
-  }
-}
-```
+**Features:**
+- Role switching in Settings (demo purposes)
+- Mock classroom creation and joining
+- Persistent login state during session
 
 1. Prerequisites:
 

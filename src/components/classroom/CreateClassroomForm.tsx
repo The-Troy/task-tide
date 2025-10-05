@@ -68,7 +68,7 @@ export function CreateClassroomForm({ onClassroomCreated }: CreateClassroomFormP
 
   const createClassroom = async (data: ClassroomFormValues): Promise<Classroom> => {
     const joinCode = generateJoinCode(data.name, data.year);
-    const joinLink = `${window.location.origin}/join/${joinCode}`;
+    const joinLink = `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/join/${joinCode}`;
     
     const classroomData = {
       name: data.name,

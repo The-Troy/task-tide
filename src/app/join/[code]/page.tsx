@@ -73,10 +73,8 @@ export default function JoinClassroomPage({ params }: JoinPageProps) {
       }
 
       // Add student to classroom and classroom to student
-      await Promise.all([
-        addStudentToClassroom(classroom.id, currentUser.id),
-        addClassroomToStudent(currentUser.id, classroom.id)
-      ]);
+      await addStudentToClassroom(classroom.id, currentUser.id);
+      await addClassroomToStudent(currentUser.id, classroom.id);
       
       // Update local state
       classroom.members.push(currentUser.id);

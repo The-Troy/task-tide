@@ -1,9 +1,7 @@
-
 "use client";
 
 import type { User, UserRole, Semester } from '@/lib/types';
-import { addNotification, addGroup as addGroupData, joinGroup as joinGroupData, semesters as staticSemesters, assignmentGroups } from '@/lib/data';
-import { createAccount, signInWithEmail, signOutUser, onAuthStateChange } from '@/lib/auth';
+import { addNotification, addGroup as addGroupData, joinGroup as joinGroupData, semesters as staticSemesters, assignmentGroups, getUserByEmail, addUser } from '@/lib/data';
 import React, { createContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import type { AssignmentGroup } from '@/lib/types';
 
@@ -12,8 +10,9 @@ interface AppContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   role: UserRole;
-  login: (email: string, password: string) => boolean;
-  register: (userData: { name: string; email: string; password: string; role: UserRole }) => boolean;
+  setRole: (role: UserRole) => void;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (userData: { name: string; email: string; password: string; role: UserRole }) => Promise<boolean>;
   logout: () => void;
   createNotification: (title: string, description: string, link?: string) => void;
   createGroup: (groupDetails: Omit<AssignmentGroup, 'id' | 'members' | 'createdBy'>) => AssignmentGroup | null;
@@ -25,48 +24,62 @@ export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [semesters, setSemesters] = useState<Semester[]>(staticSemesters); 
 
   const isAuthenticated = currentUser !== null;
   const role = currentUser?.role || 'student';
 
-  // Set up Firebase auth state listener
-  useEffect(() => {
-    const unsubscribe = onAuthStateChange((user) => {
-      setCurrentUser(user);
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const setRole = useCallback((newRole: UserRole) => {
+    if (currentUser) {
+      setCurrentUser({ ...currentUser, role: newRole });
+    }
+  }, [currentUser]);
   
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    try {
-      await signInWithEmail(email, password);
+    setIsLoading(true);
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    const user = getUserByEmail(email);
+    if (user && password === 'demo123') {
+      setCurrentUser(user);
+      setIsLoading(false);
       return true;
-    } catch (error) {
-      console.error('Login error:', error);
-      return false;
     }
+    
+    setIsLoading(false);
+    return false;
   }, []);
 
   const register = useCallback(async (userData: { name: string; email: string; password: string; role: UserRole }): Promise<boolean> => {
-    try {
-      await createAccount(userData.email, userData.password, userData.name, userData.role);
-      return true;
-    } catch (error) {
-      console.error('Registration error:', error);
+    setIsLoading(true);
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Check if user already exists
+    const existingUser = getUserByEmail(userData.email);
+    if (existingUser) {
+      setIsLoading(false);
       return false;
     }
+    
+    // Create new user
+    const newUser = addUser({
+      name: userData.name,
+      email: userData.email,
+      role: userData.role,
+    });
+    
+    setCurrentUser(newUser);
+    setIsLoading(false);
+    return true;
   }, []);
 
-  const logout = useCallback(async () => {
-    try {
-      await signOutUser();
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
+  const logout = useCallback(() => {
+    setCurrentUser(null);
   }, []);
 
   const refreshSemesters = useCallback(() => {
@@ -76,7 +89,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     refreshSemesters();
   }, [refreshSemesters]);
-
 
   const createNotification = (title: string, description: string, link?: string) => {
     addNotification(title, description, link);
@@ -113,6 +125,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated,
         isLoading,
         role,
+        setRole,
         login,
         register,
         logout,

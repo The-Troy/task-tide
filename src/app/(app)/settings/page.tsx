@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,7 @@ import { useAppContext } from "@/hooks/useAppContext";
 import { useToast } from "@/hooks/use-toast";
 import { Settings, UserCircle, UserCog } from "lucide-react";
 import Image from "next/image";
+import { RoleSwitcher } from "@/components/settings/RoleSwitcher";
 
 export default function SettingsPage() {
   const { currentUser } = useAppContext();
@@ -25,13 +25,6 @@ export default function SettingsPage() {
     });
   };
 
-  const handleChangePassword = () => {
-    toast({
-      title: "Password Updated",
-      description: "Your password has been changed successfully.",
-    });
-  };
-
   return (
     <div className="container mx-auto py-6 space-y-8">
       <header className="mb-8">
@@ -43,32 +36,8 @@ export default function SettingsPage() {
         </p>
       </header>
 
-      {/* Role Display */}
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl font-headline flex items-center text-primary">
-            <UserCog className="mr-2 h-6 w-6"/>
-            Current Role
-          </CardTitle>
-          <CardDescription>
-            You are currently logged in with the following role.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center space-x-3 p-4 bg-muted rounded-lg">
-            <div className="w-3 h-3 bg-primary rounded-full"></div>
-            <span className="text-lg font-semibold capitalize">
-              {currentUser.role.replace('_', ' ')}
-            </span>
-          </div>
-          <p className="mt-3 text-sm text-muted-foreground">
-            {currentUser.role === 'student' 
-              ? 'As a student, you can join groups and access documents.'
-              : 'As a class representative, you can create and manage groups.'
-            }
-          </p>
-        </CardContent>
-      </Card>
+      {/* Role Switcher */}
+      <RoleSwitcher />
 
       <Card className="shadow-lg">
         <CardHeader>
@@ -104,7 +73,6 @@ export default function SettingsPage() {
           </Button>
         </CardContent>
       </Card>
-
     </div>
   );
 }

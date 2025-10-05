@@ -1,106 +1,77 @@
-// Firestore utilities for classroom management
-import { 
-  collection, 
-  addDoc, 
-  query, 
-  where, 
-  getDocs, 
-  doc, 
-  updateDoc, 
-  arrayUnion,
-  getDoc
-} from 'firebase/firestore';
-import { db } from './firebase';
-
+// Mock Firestore utilities for classroom management (demo purposes)
 import type { Classroom } from './types';
 
-export const createClassroom = async (classroomData: Omit<Classroom, 'id' | 'createdAt'>): Promise<Classroom> => {
-  try {
-    const docRef = await addDoc(collection(db, 'classrooms'), {
-      ...classroomData,
-      createdAt: new Date().toISOString()
-    });
-    
-    return {
-      ...classroomData,
-      id: docRef.id,
-      createdAt: new Date().toISOString(),
-    };
-  } catch (error) {
-    console.error('Error creating classroom:', error);
-    throw new Error('Failed to create classroom');
+// Mock data for demo purposes
+const mockClassrooms: Classroom[] = [
+  {
+    id: 'classroom1',
+    name: 'Bachelor of Information Technology',
+    year: '2025',
+    semester: 'Spring',
+    joinCode: 'BIT25-ABC',
+    joinLink: `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/join/BIT25-ABC`,
+    createdBy: 'user_classrep_01',
+    members: ['user_student_01'],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'classroom2',
+    name: 'Computer Science Fundamentals',
+    year: '2025',
+    semester: 'Fall',
+    joinCode: 'CSF25-XYZ',
+    joinLink: `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/join/CSF25-XYZ`,
+    createdBy: 'user_classrep_01',
+    members: [],
+    createdAt: new Date().toISOString(),
   }
+];
+
+export const createClassroom = async (classroomData: Omit<Classroom, 'id' | 'createdAt'>): Promise<Classroom> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  const newClassroom: Classroom = {
+    ...classroomData,
+    id: `classroom_${Date.now()}`,
+    createdAt: new Date().toISOString(),
+  };
+  
+  mockClassrooms.push(newClassroom);
+  return newClassroom;
 };
 
 export const findClassroomByJoinCode = async (joinCode: string): Promise<Classroom | null> => {
-  try {
-    const q = query(
-      collection(db, 'classrooms'),
-      where('joinCode', '==', joinCode)
-    );
-    const querySnapshot = await getDocs(q);
-    
-    if (querySnapshot.empty) {
-      return null;
-    }
-    
-    const doc = querySnapshot.docs[0];
-    return {
-      id: doc.id,
-      ...doc.data()
-    } as Classroom;
-  } catch (error) {
-    console.error('Error finding classroom:', error);
-    throw new Error('Failed to find classroom');
-  }
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  return mockClassrooms.find(classroom => classroom.joinCode === joinCode) || null;
 };
 
 export const addStudentToClassroom = async (classroomId: string, studentId: string): Promise<void> => {
-  try {
-    const classroomRef = doc(db, 'classrooms', classroomId);
-    await updateDoc(classroomRef, {
-      members: arrayUnion(studentId)
-    });
-  } catch (error) {
-    console.error('Error adding student to classroom:', error);
-    throw new Error('Failed to join classroom');
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const classroom = mockClassrooms.find(c => c.id === classroomId);
+  if (classroom && !classroom.members.includes(studentId)) {
+    classroom.members.push(studentId);
   }
 };
 
 export const addClassroomToStudent = async (studentId: string, classroomId: string): Promise<void> => {
-  try {
-    const userRef = doc(db, 'users', studentId);
-    await updateDoc(userRef, {
-      joinedClassrooms: arrayUnion(classroomId)
-    });
-  } catch (error) {
-    console.error('Error adding classroom to student:', error);
-    throw new Error('Failed to update student record');
-  }
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // In a real app, this would update the user's document in Firestore
+  // For demo purposes, we'll just simulate the operation
+  console.log(`Added classroom ${classroomId} to student ${studentId}`);
 };
 
 export const getUserClassrooms = async (userId: string): Promise<Classroom[]> => {
-  try {
-    const userDoc = await getDoc(doc(db, 'users', userId));
-    const joinedClassrooms = userDoc.data()?.joinedClassrooms || [];
-    
-    if (joinedClassrooms.length === 0) {
-      return [];
-    }
-    
-    const classroomPromises = joinedClassrooms.map((id: string) => 
-      getDoc(doc(db, 'classrooms', id))
-    );
-    const classroomDocs = await Promise.all(classroomPromises);
-    
-    return classroomDocs
-      .filter(doc => doc.exists())
-      .map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Classroom));
-  } catch (error) {
-    console.error('Error getting user classrooms:', error);
-    return [];
-  }
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  return mockClassrooms.filter(classroom => 
+    classroom.members.includes(userId) || classroom.createdBy === userId
+  );
 };
