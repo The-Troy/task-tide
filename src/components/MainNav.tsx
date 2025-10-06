@@ -23,7 +23,7 @@ export function MainNav() {
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/rooms", label: "Rooms", icon: LayoutGrid }, // New "Rooms" item
+    { href: "/rooms", label: "Course Units", icon: LayoutGrid },
     { href: "/notifications", label: "Notifications", icon: Bell },
     { href: "/settings", label: "Settings", icon: SettingsIcon },
   ];

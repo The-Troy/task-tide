@@ -8,8 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/hooks/useAppContext";
 import { Loader2, CheckCircle, AlertCircle, Users, School } from "lucide-react";
 import Link from "next/link";
-import { findClassroomByJoinCode, addStudentToClassroom, addClassroomToStudent } from "@/lib/firestore";
-import type { Classroom } from "@/lib/types";
+import { findServerByJoinCode, addStudentToServer } from "@/lib/firestore";
+import type { CourseServer } from "@/lib/types";
 
 interface JoinPageProps {
   params: {
@@ -18,7 +18,7 @@ interface JoinPageProps {
 }
 
 export default function JoinClassroomPage({ params }: JoinPageProps) {
-  const [classroom, setClassroom] = useState<Classroom | null>(null);
+  const [server, setServer] = useState<CourseServer | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
   const [hasJoined, setHasJoined] = useState(false);
@@ -29,65 +29,56 @@ export default function JoinClassroomPage({ params }: JoinPageProps) {
   const router = useRouter();
 
   useEffect(() => {
-    const findClassroom = async () => {
+    const findServer = async () => {
       try {
-        const foundClassroom = await findClassroomByJoinCode(params.code);
+        const foundServer = await findServerByJoinCode(params.code);
         
-        if (foundClassroom) {
-          setClassroom(foundClassroom);
+        if (foundServer) {
+          setServer(foundServer);
         } else {
-          setError("Invalid join code. The classroom you're looking for doesn't exist.");
+          setError("Invalid join code. The course server you're looking for doesn't exist.");
         }
       } catch (err) {
-        setError("Failed to load classroom information. Please try again.");
+        setError("Failed to load server information. Please try again.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    findClassroom();
+    findServer();
   }, [params.code]);
 
-  const handleJoinClassroom = async () => {
-    if (!currentUser || !classroom) return;
+  const handleJoinServer = async () => {
+    if (!currentUser || !server) return;
 
-    if (currentUser.role !== 'student') {
-      toast({
-        title: "Permission Denied",
-        description: "Only students can join classrooms.",
-        variant: "destructive",
-      });
-      return;
-    }
 
     setIsJoining(true);
     try {
       // Check if already a member
-      if (classroom.members.includes(currentUser.id)) {
+      if (server.members.includes(currentUser.id)) {
         toast({
           title: "Already Joined",
-          description: "You are already a member of this classroom.",
+          description: "You are already a member of this course server.",
           variant: "destructive",
         });
         return;
       }
 
-      // Add student to classroom and classroom to student
-      await addStudentToClassroom(classroom.id, currentUser.id);
-      await addClassroomToStudent(currentUser.id, classroom.id);
+      // Add user to server
+      await addStudentToServer(server.id, currentUser.id);
       
       // Update local state
-      classroom.members.push(currentUser.id);
+      server.members.push(currentUser.id);
       setHasJoined(true);
       
       toast({
         title: "Successfully Joined!",
-        description: `Welcome to ${classroom.name}!`,
+        description: `Welcome to ${server.name}!`,
       });
     } catch (err) {
       toast({
         title: "Error",
-        description: "Failed to join classroom. Please try again.",
+        description: "Failed to join course server. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -101,9 +92,9 @@ export default function JoinClassroomPage({ params }: JoinPageProps) {
         <Card className="w-full max-w-md shadow-2xl">
           <CardHeader className="text-center">
             <School className="mx-auto h-12 w-12 text-primary mb-4" />
-            <CardTitle className="text-2xl font-headline">Join Classroom</CardTitle>
+            <CardTitle className="text-2xl font-headline">Join Course Server</CardTitle>
             <CardDescription>
-              You need to be logged in to join a classroom.
+              You need to be logged in to join a course server.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-4">
@@ -128,21 +119,21 @@ export default function JoinClassroomPage({ params }: JoinPageProps) {
         <Card className="w-full max-w-md shadow-2xl">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-            <p className="text-muted-foreground">Loading classroom information...</p>
+            <p className="text-muted-foreground">Loading server information...</p>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  if (error || !classroom) {
+  if (error || !server) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background to-secondary flex items-center justify-center p-6">
         <Card className="w-full max-w-md shadow-2xl">
           <CardHeader className="text-center">
             <AlertCircle className="mx-auto h-12 w-12 text-destructive mb-4" />
             <CardTitle className="text-2xl font-headline text-destructive">
-              Classroom Not Found
+              Course Server Not Found
             </CardTitle>
             <CardDescription>{error}</CardDescription>
           </CardHeader>
@@ -166,12 +157,12 @@ export default function JoinClassroomPage({ params }: JoinPageProps) {
               Successfully Joined!
             </CardTitle>
             <CardDescription>
-              Welcome to {classroom.name}! You can now access all classroom resources.
+              Welcome to {server.name}! You can now access all course resources.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <Button asChild className="w-full">
-              <Link href="/rooms">Explore Classroom</Link>
+              <Link href="/rooms">Explore Course Server</Link>
             </Button>
             <Button asChild variant="outline" className="w-full">
               <Link href="/dashboard">Go to Dashboard</Link>
@@ -187,30 +178,30 @@ export default function JoinClassroomPage({ params }: JoinPageProps) {
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="text-center">
           <School className="mx-auto h-12 w-12 text-primary mb-4" />
-          <CardTitle className="text-2xl font-headline">Join Classroom</CardTitle>
+          <CardTitle className="text-2xl font-headline">Join Course Server</CardTitle>
           <CardDescription>
-            You've been invited to join a classroom
+            You've been invited to join a course server
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <Card className="bg-muted/50">
             <CardHeader>
-              <CardTitle className="text-lg">{classroom.name}</CardTitle>
+              <CardTitle className="text-lg">{server.name}</CardTitle>
               <CardDescription>
-                {classroom.year} • {classroom.semester}
+                {server.year} • {server.semester}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center text-sm text-muted-foreground">
                 <Users className="mr-2 h-4 w-4" />
-                {classroom.members.length} member{classroom.members.length !== 1 ? 's' : ''}
+                {server.members.length} member{server.members.length !== 1 ? 's' : ''}
               </div>
             </CardContent>
           </Card>
           
           <div className="space-y-3">
             <Button 
-              onClick={handleJoinClassroom} 
+              onClick={handleJoinServer} 
               disabled={isJoining}
               className="w-full"
             >
@@ -220,7 +211,7 @@ export default function JoinClassroomPage({ params }: JoinPageProps) {
                   Joining...
                 </>
               ) : (
-                "Join Classroom"
+                "Join Course Server"
               )}
             </Button>
             

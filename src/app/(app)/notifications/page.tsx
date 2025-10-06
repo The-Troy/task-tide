@@ -2,21 +2,46 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { getNotifications, markNotificationAsRead, notifications as staticNotifications } from "@/lib/data";
+import { getNotifications, markNotificationAsRead, notifications as staticNotifications, addNotification } from "@/lib/data";
 import type { NotificationMessage } from "@/lib/types";
 import { NotificationItem } from "@/components/notifications/NotificationItem";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BellOff, BellRing, CheckCheck } from "lucide-react";
+import { BellOff, BellRing, CheckCheck, Calendar, Clock } from "lucide-react";
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<NotificationMessage[]>([]);
   
   useEffect(() => {
+    // Add some demo notifications for the new system
+    addNotification(
+      "Document Uploaded", 
+      "Advanced Algorithms Notes.pdf was uploaded to Data Structures unit by Dr. Smith",
+      "/rooms/sem2/unit201"
+    );
+    addNotification(
+      "New Group Created", 
+      "Project Team Alpha group was created for Final Year Project",
+      "/rooms/sem3/unit301"
+    );
+    
     const initialNotifications = [...staticNotifications].sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     setNotifications(initialNotifications);
   }, []);
 
+  // Group notifications by date
+  const groupNotificationsByDate = (notifications: NotificationMessage[]) => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+    const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const groups: { [key: string]: NotificationMessage[] } = {
+      'Today': [],
+      'Yesterday': [],
+      'Last Week': [],
+      'Older': []
+    };
   const handleMarkAsRead = (id: string) => {
     markNotificationAsRead(id); // This updates the source data
     setNotifications(prev => 
