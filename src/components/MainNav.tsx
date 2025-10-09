@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Bell,
+  Calendar,
   SettingsIcon,
   LayoutGrid, // Changed from FolderKanban, Users
 } from "lucide-react";
@@ -24,6 +25,7 @@ export function MainNav() {
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/rooms", label: "Course Units", icon: LayoutGrid },
+    { href: "/calendar", label: "Calendar", icon: Calendar },
     { href: "/notifications", label: "Notifications", icon: Bell },
     { href: "/settings", label: "Settings", icon: SettingsIcon },
   ];

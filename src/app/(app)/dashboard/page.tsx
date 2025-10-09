@@ -8,7 +8,6 @@ import Image from "next/image";
 import StudyTipCard from "@/components/StudyTipCard";
 import { CreateServerForm } from "@/components/server/CreateServerForm";
 import { JoinServerForm } from "@/components/server/JoinServerForm";
-import { ServerOnboarding } from "@/components/onboarding/ServerOnboarding";
 import { useState, useEffect } from "react";
 import { getUserServers } from "@/lib/firestore";
 import type { CourseServer } from "@/lib/types";
@@ -17,7 +16,6 @@ export default function DashboardPage() {
   const { currentUser } = useAppContext();
   const [userServers, setUserServers] = useState<CourseServer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(false);
 
   if (!currentUser) {
     return null;
@@ -28,9 +26,8 @@ export default function DashboardPage() {
       try {
         const servers = await getUserServers(currentUser.id);
         setUserServers(servers);
-        setShowOnboarding(servers.length === 0);
       } catch (error) {
-        console.error('Failed to load user servers:', error);
+        console.error("Failed to load user servers:", error);
       } finally {
         setIsLoading(false);
       }
@@ -42,7 +39,6 @@ export default function DashboardPage() {
   const refreshServers = async () => {
     const servers = await getUserServers(currentUser.id);
     setUserServers(servers);
-    setShowOnboarding(false);
   };
 
   if (isLoading) {
@@ -53,9 +49,6 @@ export default function DashboardPage() {
     );
   }
 
-  if (showOnboarding) {
-    return <ServerOnboarding onComplete={refreshServers} />;
-  }
   const quickStats = [
     { title: "Total Documents", value: "125", icon: BookOpen, color: "text-primary", href: "/rooms" },
     { title: "Active Groups", value: "8", icon: Users, color: "text-accent", href: "/rooms" },
@@ -112,16 +105,18 @@ export default function DashboardPage() {
                   <CardContent>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Users className="mr-2 h-4 w-4" />
-                      {server.members.length} member{server.members.length !== 1 ? 's' : ''}
+                      {server.members.length} member{server.members.length !== 1 ? "s" : ""}
                       {server.createdBy === currentUser.id && (
-                        <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-1 rounded">Admin</span>
+                        <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                          Admin
+                        </span>
                       )}
                     </div>
                   </CardContent>
                 </Card>
               </Link>
             ))}
-            
+
             {/* Add Server Button */}
             <Card className="border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors cursor-pointer group">
               <CardContent className="flex flex-col items-center justify-center h-full p-6 text-center">
@@ -135,6 +130,7 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
+
       {/* Quick Stats */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
         {quickStats.map((stat) => (
@@ -164,26 +160,28 @@ export default function DashboardPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Server Actions */}
           <div className="flex flex-col sm:flex-row gap-4">
             <CreateServerForm onServerCreated={refreshServers} />
             <JoinServerForm onServerJoined={refreshServers} />
           </div>
-          
-          {/* Other Actions */}
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Link href="/rooms" className="block p-4 border rounded-lg hover:bg-muted transition-colors">
-            <div className="flex items-center mb-1">
-              <LayoutGrid className="mr-2 h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-lg text-primary">Explore Rooms</h3>
-            </div>
-            <p className="text-sm text-muted-foreground">Access documents and groups organized by semester and unit.</p>
-          </Link>
+            <Link
+              href="/rooms"
+              className="block p-4 border rounded-lg hover:bg-muted transition-colors"
+            >
+              <div className="flex items-center mb-1">
+                <LayoutGrid className="mr-2 h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-lg text-primary">Explore Course Units</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Access documents and groups organized by semester and unit.
+              </p>
+            </Link>
           </div>
         </CardContent>
       </Card>
 
-      {/* Study Tip Card */}
       <StudyTipCard />
     </div>
   );

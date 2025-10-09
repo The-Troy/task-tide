@@ -1,4 +1,3 @@
-
 "use client";
 
 import { AppContext } from '@/contexts/AppContext';
