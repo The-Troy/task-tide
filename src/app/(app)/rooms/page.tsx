@@ -1,11 +1,16 @@
 
+'use client';
+
 import { getSemesters, getUnitsBySemester } from "@/lib/data";
 import type { Unit, Semester } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { BookCopy } from "lucide-react";
+import { BookCopy, PlusCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAppContext } from "@/hooks/useAppContext";
+import { useRouter } from 'next/navigation';
 
 // Helper to get a consistent color from a predefined list based on string hash
 const colorClasses = [
@@ -33,7 +38,9 @@ function getColorClassForUnit(unitName: string): string {
 }
 
 
-export default async function AllUnitsPage() {
+export default function AllUnitsPage() {
+  const { currentUser } = useAppContext();
+  const router = useRouter();
   const semesters = getSemesters();
   const allUnitsWithSemester: Array<Unit & { semesterName: string }> = [];
 
@@ -46,13 +53,20 @@ export default async function AllUnitsPage() {
 
   return (
     <div className="container mx-auto py-6">
-      <header className="mb-8">
-        <h1 className="text-4xl font-bold font-headline text-primary flex items-center">
-          <BookCopy className="mr-3 h-10 w-10" /> Browse All Units
-        </h1>
-        <p className="text-lg text-muted-foreground mt-2">
-          Explore all available units across different semesters.
-        </p>
+      <header className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-4xl font-bold font-headline text-primary flex items-center">
+            <BookCopy className="mr-3 h-10 w-10" /> Browse All Units
+          </h1>
+          <p className="text-lg text-muted-foreground mt-2">
+            Explore all available units across different semesters.
+          </p>
+        </div>
+        {currentUser && (currentUser.role === 'admin' || currentUser.role === 'class-rep') && (
+        <Button onClick={() => router.push('/documents/add')}>
+          <PlusCircle className="mr-2 h-4 w-4" /> Add Document
+        </Button>
+      )}
       </header>
 
       {allUnitsWithSemester.length > 0 ? (
