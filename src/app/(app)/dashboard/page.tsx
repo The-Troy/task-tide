@@ -8,11 +8,11 @@ import StudyTipCard from "@/components/StudyTipCard";
 import { JoinServerForm } from "@/components/server/JoinServerForm";
 import { useState, useEffect } from "react";
 import { getUserServers } from "@/lib/firestore";
-import type { CourseServer } from "@/lib/types";
+import type { Course } from "@/lib/types";
 
 export default function DashboardPage() {
   const { currentUser } = useAppContext();
-  const [userServers, setUserServers] = useState<CourseServer[]>([]);
+  const [userCourses, setUserCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   if (!currentUser) {
@@ -20,23 +20,23 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    const loadUserServers = async () => {
+    const loadUserCourses = async () => {
       try {
-        const servers = await getUserServers(currentUser.id);
-        setUserServers(servers);
+        const courses = await getUserCourses(currentUser.id);
+        setUserCourses(courses);
       } catch (error) {
-        console.error("Failed to load user servers:", error);
+        console.error("Failed to load user courses:", error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadUserServers();
+    loadUserCourses();
   }, [currentUser.id]);
 
-  const refreshServers = async () => {
-    const servers = await getUserServers(currentUser.id);
-    setUserServers(servers);
+  const refreshCourses = async () => {
+    const courses = await getUserCourses(currentUser.id);
+    setUserCourses(courses);
   };
 
   if (isLoading) {
@@ -74,59 +74,43 @@ export default function DashboardPage() {
         <CardHeader>
           <CardTitle className="text-2xl font-headline flex items-center">
             <Server className="mr-3 h-7 w-7 text-primary" />
-            Your Course Servers
+            Your Courses
           </CardTitle>
           <CardDescription>
-            Servers you've created or joined ({userServers.length} total)
+            Courses you've created or joined ({userCourses.length} total)
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {userServers.map((server) => (
-              <Link href="/rooms" key={server.id}>
-                <Card className="hover:shadow-lg transition-shadow duration-200 cursor-pointer border-2 border-transparent hover:border-primary/20">
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center">
-                      <Server className="mr-2 h-5 w-5 text-primary" />
-                      {server.name}
-                    </CardTitle>
-                    <CardDescription>
-                      {server.year} • {server.semester}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Users className="mr-2 h-4 w-4" />
-                      {server.members.length} member{server.members.length !== 1 ? "s" : ""}
-                      {server.createdBy === currentUser.id && (
-                        <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-1 rounded">
-                          Admin
-                        </span>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-
-            {/* Add Server Button */}
-            <Card className="border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors cursor-pointer group">
-              <CardContent className="flex flex-col items-center justify-center h-full p-6 text-center">
-                <div className="mx-auto bg-primary/10 text-primary rounded-full p-4 w-fit mb-4 group-hover:bg-primary/20 transition-colors">
-                  <Plus className="h-8 w-8" />
-                </div>
-                <h3 className="font-semibold text-primary mb-2">Add Server</h3>
-                <p className="text-sm text-muted-foreground">Create or join another course server</p>
-              </CardContent>
-            </Card>
+          <div className="h-96 overflow-y-auto">
+            <div className="flex flex-col gap-4">
+              {userCourses.map((course) => (
+                <Link href={`/course/${course.id}`} key={course.id}>
+                  <Card className="hover:shadow-lg transition-shadow duration-200 cursor-pointer border-2 border-transparent hover:border-primary/20">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center">
+                        <Server className="mr-2 h-5 w-5 text-primary" />
+                        {course.name}
+                      </CardTitle>
+                      <CardDescription>
+                        {course.year} • {course.semester}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Users className="mr-2 h-4 w-4" />
+                        {course.members.length} member{course.members.length !== 1 ? "s" : ""}
+                        {course.createdBy === currentUser.id && (
+                          <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-1 rounded">
+                            Admin
+                          </span>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Join Server */}
-      <Card className="mb-8">
-        <CardContent className="pt-6">
-          <JoinServerForm onServerJoined={refreshServers} />
         </CardContent>
       </Card>
 

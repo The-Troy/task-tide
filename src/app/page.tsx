@@ -19,17 +19,17 @@ export default function LandingPage() {
           variants={fadeInUp}
           className="flex flex-col items-center gap-6"
         >
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-            Welcome to <span className="text-purple-400">TaskTide</span>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white">
+            Welcome to <span className="text-purple-300">TaskTide</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl">
+          <p className="text-lg md:text-xl text-gray-200 max-w-2xl">
             Your personal companion for organizing tasks, staying focused, and
             conquering the semester ahead.
           </p>
           <Button
             size="lg"
             asChild
-            className="bg-purple-600 hover:bg-purple-700 text-white rounded-full px-12 py-6 text-lg font-semibold transition-transform transform hover:scale-105"
+            className="bg-purple-500 hover:bg-purple-600 text-white rounded-full px-12 py-6 text-lg font-semibold transition-transform transform hover:scale-105"
           >
             <Link href="/login">Get Started</Link>
           </Button>

@@ -55,7 +55,7 @@ export interface NotificationMessage {
   link?: string; // Optional link to the relevant item
 }
 
-export interface Classroom {
+export interface Course {
   id: string;
   name: string;
   year: string;
@@ -65,4 +65,5 @@ export interface Classroom {
   createdBy: string;
   members: string[];
   createdAt: string;
+  units: Unit[];
 }

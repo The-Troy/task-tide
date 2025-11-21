@@ -1,10 +1,10 @@
 // Mock Firestore utilities for classroom management (demo purposes)
-import type { CourseServer } from './types';
+import type { Course, Unit, DocumentFile, AssignmentGroup } from './types';
 
 // Mock data for demo purposes
-const mockServers: CourseServer[] = [
+const mockCourses: Course[] = [
   {
-    id: 'server1',
+    id: 'course1',
     name: 'BSc Computer Science',
     year: '2025',
     semester: 'Spring',
@@ -13,10 +13,13 @@ const mockServers: CourseServer[] = [
     createdBy: 'user_classrep_01',
     members: ['user_student_01'],
     createdAt: new Date().toISOString(),
-    maxGroupsPerUnit: 50,
+    units: [
+      { id: 'unit1', name: 'Introduction to Programming', semesterId: 'course1' },
+      { id: 'unit2', name: 'Data Structures and Algorithms', semesterId: 'course1' },
+    ],
   },
   {
-    id: 'server2',
+    id: 'course2',
     name: 'Computer Science Fundamentals',
     year: '2025',
     semester: 'Fall',
@@ -25,9 +28,28 @@ const mockServers: CourseServer[] = [
     createdBy: 'user_classrep_01',
     members: ['user_classrep_01'],
     createdAt: new Date().toISOString(),
-    maxGroupsPerUnit: 50,
+    units: [
+      { id: 'unit3', name: 'Web Development', semesterId: 'course2' },
+      { id: 'unit4', name: 'Database Systems', semesterId: 'course2' },
+    ],
   }
 ];
+
+const mockDocuments: { [unitId: string]: DocumentFile[] } = {
+  unit1: [
+    { id: 'doc1', name: 'Syllabus', type: 'pdf', url: '/', uploadedAt: new Date().toISOString(), semesterId: 'course1', unitId: 'unit1' },
+    { id: 'doc2', name: 'Lecture 1 Slides', type: 'pdf', url: '/', uploadedAt: new Date().toISOString(), semesterId: 'course1', unitId: 'unit1' },
+  ],
+  unit2: [
+    { id: 'doc3', name: 'Assignment 1', type: 'docx', url: '/', uploadedAt: new Date().toISOString(), semesterId: 'course1', unitId: 'unit2' },
+  ],
+};
+
+const mockGroups: { [unitId: string]: AssignmentGroup[] } = {
+  unit1: [
+    { id: 'group1', assignmentName: 'Project 1', maxSize: 4, members: [], createdBy: { id: 'user_classrep_01', name: 'Class Rep' }, unitId: 'unit1', semesterId: 'course1' },
+  ],
+};
 
 const generateJoinCode = (courseName: string, year: string): string => {
   const coursePrefix = courseName.replace(/\s+/g, '').substring(0, 3).toUpperCase();
@@ -36,62 +58,77 @@ const generateJoinCode = (courseName: string, year: string): string => {
   return `${coursePrefix}${yearSuffix}-${randomSuffix}`;
 };
 
-export const createCourseServer = async (serverData: Omit<CourseServer, 'id' | 'createdAt' | 'joinCode' | 'joinLink'>): Promise<CourseServer> => {
+export const createCourse = async (courseData: Omit<Course, 'id' | 'createdAt' | 'joinCode' | 'joinLink' | 'units'>): Promise<Course> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 500));
   
-  const joinCode = generateJoinCode(serverData.name, serverData.year);
+  const joinCode = generateJoinCode(courseData.name, courseData.year);
   const joinLink = `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/join/${joinCode}`;
   
-  const newServer: CourseServer = {
-    ...serverData,
-    id: `server_${Date.now()}`,
+  const newCourse: Course = {
+    ...courseData,
+    id: `course_${Date.now()}`,
     joinCode,
     joinLink,
     createdAt: new Date().toISOString(),
+    units: [],
   };
   
-  mockServers.push(newServer);
-  return newServer;
+  mockCourses.push(newCourse);
+  return newCourse;
 };
 
-export const findServerByJoinCode = async (joinCode: string): Promise<CourseServer | null> => {
+export const findCourseByJoinCode = async (joinCode: string): Promise<Course | null> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
-  return mockServers.find(server => server.joinCode === joinCode) || null;
+  return mockCourses.find(course => course.joinCode === joinCode) || null;
 };
 
-export const addStudentToServer = async (serverId: string, studentId: string): Promise<void> => {
+export const addStudentToCourse = async (courseId: string, studentId: string): Promise<void> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
-  const server = mockServers.find(s => s.id === serverId);
-  if (server && !server.members.includes(studentId)) {
-    server.members.push(studentId);
+  const course = mockCourses.find(c => c.id === courseId);
+  if (course && !course.members.includes(studentId)) {
+    course.members.push(studentId);
   }
 };
 
-export const getUserServers = async (userId: string): Promise<CourseServer[]> => {
+export const getUserCourses = async (userId: string): Promise<Course[]> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
-  return mockServers.filter(server => 
-    server.members.includes(userId) || server.createdBy === userId
+  return mockCourses.filter(course => 
+    course.members.includes(userId) || course.createdBy === userId
   );
 };
 
-// Legacy functions for backward compatibility
-export const createClassroom = createCourseServer;
-export const findClassroomByJoinCode = findServerByJoinCode;
-export const addStudentToClassroom = addStudentToServer;
-export const getUserClassrooms = getUserServers;
-
-export const addClassroomToStudent = async (studentId: string, serverId: string): Promise<void> => {
+export const getCourse = async (courseId: string): Promise<Course | null> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
   
-  // In a real app, this would update the user's document in Firestore
-  // For demo purposes, we'll just simulate the operation
-  console.log(`Added server ${serverId} to student ${studentId}`);
+  return mockCourses.find(course => course.id === courseId) || null;
+};
+
+export const getUnitsForCourse = async (courseId: string): Promise<Unit[]> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const course = mockCourses.find(c => c.id === courseId);
+  return course ? course.units : [];
+};
+
+export const getDocumentsForUnit = async (unitId: string): Promise<DocumentFile[]> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  return mockDocuments[unitId] || [];
+};
+
+export const getGroupsForUnit = async (unitId: string): Promise<AssignmentGroup[]> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  return mockGroups[unitId] || [];
 };
