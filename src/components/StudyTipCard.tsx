@@ -53,14 +53,7 @@ const fallbackTips = [
   { text: "🎯 Your effort today is an investment in tomorrow.", author: "TaskTide Team 💜" },
 ];
 
-const gradients = [
-  "bg-gradient-to-r from-pink-100 via-purple-100 to-blue-100",
-  "bg-gradient-to-r from-purple-100 via-pink-100 to-orange-100",
-  "bg-gradient-to-r from-blue-100 via-purple-100 to-indigo-100",
-  "bg-gradient-to-r from-green-100 via-emerald-100 to-teal-100",
-  "bg-gradient-to-r from-yellow-100 via-orange-100 to-pink-100",
-  "bg-gradient-to-r from-rose-100 via-purple-100 to-sky-100",
-];
+
 
 // ✅ List of images (add them in /public/images/study-tips/)
 const images = [
@@ -75,17 +68,14 @@ const images = [
 export default function StudyTipCard() {
   const [quote, setQuote] = useState(fallbackTips[0].text);
   const [author, setAuthor] = useState(fallbackTips[0].author);
-  const [gradient, setGradient] = useState(gradients[0]);
   const [image, setImage] = useState(images[0]);
 
   function getRandomQuote() {
     const randomQuote = fallbackTips[Math.floor(Math.random() * fallbackTips.length)];
-    const randomGradient = gradients[Math.floor(Math.random() * gradients.length)];
     const randomImage = images[Math.floor(Math.random() * images.length)];
 
     setQuote(randomQuote.text);
     setAuthor(randomQuote.author);
-    setGradient(randomGradient);
     setImage(randomImage);
   }
 
@@ -95,7 +85,7 @@ export default function StudyTipCard() {
 
   return (
     <motion.div
-      className={`mt-8 p-6 rounded-2xl shadow-xl ${gradient}`}
+      className="mt-8 p-6 rounded-2xl shadow-xl bg-[#26415E]"
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
