@@ -61,10 +61,10 @@ const generateJoinCode = (courseName: string, year: string): string => {
 export const createCourse = async (courseData: Omit<Course, 'id' | 'createdAt' | 'joinCode' | 'joinLink' | 'units'>): Promise<Course> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 500));
-  
+
   const joinCode = generateJoinCode(courseData.name, courseData.year);
   const joinLink = `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/join/${joinCode}`;
-  
+
   const newCourse: Course = {
     ...courseData,
     id: `course_${Date.now()}`,
@@ -73,7 +73,7 @@ export const createCourse = async (courseData: Omit<Course, 'id' | 'createdAt' |
     createdAt: new Date().toISOString(),
     units: [],
   };
-  
+
   mockCourses.push(newCourse);
   return newCourse;
 };
@@ -81,14 +81,14 @@ export const createCourse = async (courseData: Omit<Course, 'id' | 'createdAt' |
 export const findCourseByJoinCode = async (joinCode: string): Promise<Course | null> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   return mockCourses.find(course => course.joinCode === joinCode) || null;
 };
 
 export const addStudentToCourse = async (courseId: string, studentId: string): Promise<void> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   const course = mockCourses.find(c => c.id === courseId);
   if (course && !course.members.includes(studentId)) {
     course.members.push(studentId);
@@ -98,8 +98,8 @@ export const addStudentToCourse = async (courseId: string, studentId: string): P
 export const getUserCourses = async (userId: string): Promise<Course[]> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
-  
-  return mockCourses.filter(course => 
+
+  return mockCourses.filter(course =>
     course.members.includes(userId) || course.createdBy === userId
   );
 };
@@ -107,14 +107,14 @@ export const getUserCourses = async (userId: string): Promise<Course[]> => {
 export const getCourse = async (courseId: string): Promise<Course | null> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   return mockCourses.find(course => course.id === courseId) || null;
 };
 
 export const getUnitsForCourse = async (courseId: string): Promise<Unit[]> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   const course = mockCourses.find(c => c.id === courseId);
   return course ? course.units : [];
 };
@@ -122,13 +122,43 @@ export const getUnitsForCourse = async (courseId: string): Promise<Unit[]> => {
 export const getDocumentsForUnit = async (unitId: string): Promise<DocumentFile[]> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   return mockDocuments[unitId] || [];
 };
 
 export const getGroupsForUnit = async (unitId: string): Promise<AssignmentGroup[]> => {
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 300));
-  
+
   return mockGroups[unitId] || [];
+};
+
+// User Profile Management
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { db } from "@/firebaseConfig";
+import type { User } from "./types";
+
+export const createUserProfile = async (user: User): Promise<void> => {
+  try {
+    await setDoc(doc(db, "users", user.id), user);
+  } catch (error) {
+    console.error("Error creating user profile:", error);
+    throw error;
+  }
+};
+
+export const getUserProfile = async (userId: string): Promise<User | null> => {
+  try {
+    const docRef = doc(db, "users", userId);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return docSnap.data() as User;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting user profile:", error);
+    return null;
+  }
 };

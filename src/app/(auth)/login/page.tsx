@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/hooks/useAppContext";
@@ -27,7 +27,7 @@ export default function LoginPage() {
 
     try {
       const success = await login(email, password);
-      
+
       if (success) {
         toast({
           title: "Welcome back!",
@@ -50,38 +50,6 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleDemoLogin = (role: 'student' | 'class_representative') => {
-    setIsLoading(true);
-    
-    // Demo credentials
-    const demoCredentials = {
-      student: { email: "alex.student@example.com", password: "demo123" },
-      class_representative: { email: "casey.rep@example.com", password: "demo123" }
-    };
-    
-    const { email: demoEmail, password: demoPassword } = demoCredentials[role];
-    setEmail(demoEmail);
-    setPassword(demoPassword);
-    
-    setTimeout(async () => {
-      const success = await login(demoEmail, demoPassword);
-      if (success) {
-      toast({
-        title: `Logged in as ${role.replace('_', ' ')}`,
-        description: "Welcome to TaskTide!",
-      });
-      router.push("/dashboard");
-      } else {
-        toast({
-          title: "Demo Login Failed",
-          description: "Please create a demo account first or use the registration form.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-      }
-    }, 500);
   };
 
   return (
@@ -147,32 +115,6 @@ export default function LoginPage() {
           )}
         </Button>
       </form>
-
-      <Separator className="my-6" />
-
-      <div className="space-y-3">
-        <p className="text-sm text-center text-muted-foreground">
-          Try the demo:
-        </p>
-        <div className="grid grid-cols-1 gap-2">
-          <Button
-            variant="outline"
-            onClick={() => handleDemoLogin('student')}
-            disabled={isLoading}
-            className="w-full"
-          >
-            Demo as Student
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => handleDemoLogin('class_representative')}
-            disabled={isLoading}
-            className="w-full"
-          >
-            Demo as Class Rep
-          </Button>
-        </div>
-      </div>
 
       <div className="text-center mt-6">
         <p className="text-sm text-muted-foreground">

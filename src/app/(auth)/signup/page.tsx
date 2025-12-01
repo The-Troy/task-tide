@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/hooks/useAppContext";
@@ -54,30 +54,33 @@ export default function SignUpPage() {
     }
 
     try {
-      const success = await register({
+      await register({
         name: formData.name,
         email: formData.email,
         password: formData.password,
         role: formData.role,
       });
-      
-      if (success) {
-        toast({
-          title: "Account created!",
-          description: "Welcome to TaskTide! You have been automatically logged in.",
-        });
-        router.push("/dashboard");
-      } else {
-        toast({
-          title: "Registration failed",
-          description: "An account with this email already exists.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
+
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: "Account created!",
+        description: "Welcome to TaskTide! You have been automatically logged in.",
+      });
+      router.push("/dashboard");
+
+    } catch (error: any) {
+      let errorMessage = "Something went wrong. Please try again.";
+
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "An account with this email already exists.";
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = "Password should be at least 6 characters.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      toast({
+        title: "Registration failed",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
