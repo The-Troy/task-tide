@@ -16,10 +16,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { useAppContext } from "@/hooks/useAppContext";
-import { UserPlus, CheckCircle, Users, ArrowLeft, School } from "lucide-react";
-import { findServerByJoinCode, addStudentToServer } from "@/lib/firestore";
-import type { CourseServer } from "@/lib/types";
+import { courseServers, type ApiCourseServer } from "@/lib/api";
+import { UserPlus, CheckCircle, Users, ArrowLeft, Loader2, BookOpen } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const joinSchema = z.object({
   joinCode: z.string().min(1, "Join code is required"),
@@ -34,65 +33,33 @@ interface JoinServerFormProps {
 
 export function JoinServerForm({ onServerJoined, onCancel }: JoinServerFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [joinedServer, setJoinedServer] = useState<CourseServer | null>(null);
-  const { currentUser } = useAppContext();
+  const [joinedServer, setJoinedServer] = useState<ApiCourseServer | null>(null);
   const { toast } = useToast();
 
   const form = useForm<JoinFormValues>({
     resolver: zodResolver(joinSchema),
-    defaultValues: {
-      joinCode: "",
-    },
+    defaultValues: { joinCode: "" },
   });
 
   const onSubmit = async (data: JoinFormValues) => {
-    if (!currentUser) return;
-
     setIsLoading(true);
     try {
-      const server = await findServerByJoinCode(data.joinCode);
-      
-      if (!server) {
-        toast({
-          title: "Invalid Code",
-          description: "The join code you entered is not valid. Please check and try again.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Check if already a member
-      if (server.members.includes(currentUser.id)) {
-        toast({
-          title: "Already Joined",
-          description: "You are already a member of this course server.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      await addStudentToServer(server.id, currentUser.id);
-      setJoinedServer(server);
-      
+      const { course_server } = await courseServers.join(data.joinCode.trim());
+      setJoinedServer(course_server);
       toast({
         title: "Successfully Joined!",
-        description: `You have joined ${server.name}.`,
+        description: `You have joined ${course_server.name}.`,
       });
-      
       form.reset();
-    } catch (error) {
+    } catch (err: unknown) {
       toast({
-        title: "Error",
-        description: "Failed to join course server. Please try again.",
+        title: "Failed to Join",
+        description: err instanceof Error ? err.message : "Invalid join code. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleComplete = () => {
-    onServerJoined();
   };
 
   if (joinedServer) {
@@ -111,20 +78,26 @@ export function JoinServerForm({ onServerJoined, onCancel }: JoinServerFormProps
           <Card className="bg-muted/50">
             <CardHeader>
               <CardTitle className="text-lg">{joinedServer.name}</CardTitle>
-              <CardDescription>
-                {joinedServer.year} • {joinedServer.semester}
+              <CardDescription className="flex items-center gap-2">
+                <Badge variant="secondary" className="font-mono text-xs">{joinedServer.code}</Badge>
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Users className="mr-2 h-4 w-4" />
-                {joinedServer.members.length} member{joinedServer.members.length !== 1 ? 's' : ''}
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  {joinedServer.members_count ?? "—"} members
+                </span>
+                <span className="flex items-center gap-1">
+                  <BookOpen className="h-4 w-4" />
+                  {joinedServer.units?.length ?? 0} units
+                </span>
               </div>
             </CardContent>
           </Card>
-          
+
           <div className="flex justify-center">
-            <Button onClick={handleComplete} size="lg">
+            <Button onClick={onServerJoined} size="lg">
               Continue to Dashboard
             </Button>
           </div>
@@ -150,7 +123,7 @@ export function JoinServerForm({ onServerJoined, onCancel }: JoinServerFormProps
           Join Course Server
         </CardTitle>
         <CardDescription>
-          Enter the join code provided by your course admin to join a server.
+          Enter the join code provided by your class rep to access a server.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -163,8 +136,8 @@ export function JoinServerForm({ onServerJoined, onCancel }: JoinServerFormProps
                 <FormItem>
                   <FormLabel>Join Code</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="e.g., BSC25-ABC" 
+                    <Input
+                      placeholder="e.g., ABC123XY"
                       className="font-mono uppercase"
                       {...field}
                       onChange={(e) => field.onChange(e.target.value.toUpperCase())}
@@ -174,30 +147,19 @@ export function JoinServerForm({ onServerJoined, onCancel }: JoinServerFormProps
                 </FormItem>
               )}
             />
-            
-            <div className="bg-muted/50 p-3 rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                💡 <strong>Demo codes to try:</strong>
-              </p>
-              <div className="mt-1 space-y-1">
-                <p className="text-xs font-mono">BSC25-ABC</p>
-                <p className="text-xs font-mono">CSF25-XYZ</p>
-              </div>
-            </div>
-            
+
             <div className="flex justify-end space-x-2 pt-4">
               {onCancel && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onCancel}
-                  disabled={isLoading}
-                >
+                <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
                   Cancel
                 </Button>
               )}
               <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Joining..." : "Join Server"}
+                {isLoading ? (
+                  <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Joining…</>
+                ) : (
+                  "Join Server"
+                )}
               </Button>
             </div>
           </form>

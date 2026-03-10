@@ -1,16 +1,12 @@
-
 'use client';
 
-import { getSemesters, getUnitsBySemester } from "@/lib/data";
-import type { Unit, Semester } from "@/lib/types";
+import { useState, useEffect } from "react";
+import { units as unitsApi, courseServers as courseServersApi, type ApiUnit, type ApiCourseServer } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from "next/link";
-import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import { BookCopy, PlusCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { BookCopy, Server } from "lucide-react";
 import { useAppContext } from "@/hooks/useAppContext";
-import { useRouter } from 'next/navigation';
 
 // Helper to get a consistent color from a predefined list based on string hash
 const colorClasses = [
@@ -18,7 +14,7 @@ const colorClasses = [
   "bg-blue-500", "bg-cyan-500", "bg-teal-500", "bg-green-500",
   "bg-lime-500", "bg-yellow-500", "bg-amber-500", "bg-orange-500",
   "bg-rose-500", "bg-fuchsia-500", "bg-violet-500", "bg-sky-500",
-  "bg-emerald-500", 
+  "bg-emerald-500",
 ];
 
 function hashCode(str: string) {
@@ -26,79 +22,107 @@ function hashCode(str: string) {
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = (hash << 5) - hash + char;
-    hash |= 0; // Convert to 32bit integer
+    hash |= 0;
   }
   return hash;
 }
 
-function getColorClassForUnit(unitName: string): string {
-  const hash = hashCode(unitName);
-  const index = Math.abs(hash) % colorClasses.length;
-  return colorClasses[index];
+function getColorClass(name: string): string {
+  return colorClasses[Math.abs(hashCode(name)) % colorClasses.length];
 }
-
 
 export default function AllUnitsPage() {
   const { currentUser } = useAppContext();
-  const router = useRouter();
-  const semesters = getSemesters();
-  const allUnitsWithSemester: Array<Unit & { semesterName: string }> = [];
+  const [servers, setServers] = useState<ApiCourseServer[]>([]);
+  const [allUnits, setAllUnits] = useState<ApiUnit[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  semesters.forEach(semester => {
-    const unitsInSemester = getUnitsBySemester(semester.id);
-    unitsInSemester.forEach(unit => {
-      allUnitsWithSemester.push({ ...unit, semesterName: semester.name });
-    });
-  });
+  useEffect(() => {
+    if (!currentUser) return;
+
+    Promise.all([courseServersApi.list(), unitsApi.list()])
+      .then(([serverRes, unitRes]) => {
+        setServers(serverRes.course_servers);
+        setAllUnits(unitRes.units);
+      })
+      .catch(console.error)
+      .finally(() => setIsLoading(false));
+  }, [currentUser]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  // Group units by their course server
+  const unitsByServer = servers.map((server) => ({
+    server,
+    units: allUnits.filter((u) => u.course_server_id === server.id),
+  }));
 
   return (
     <div className="container mx-auto py-6">
-      <header className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold font-headline text-primary flex items-center">
-            <BookCopy className="mr-3 h-10 w-10" /> Browse All Units
-          </h1>
-          <p className="text-lg text-muted-foreground mt-2">
-            Explore all available units across different semesters.
-          </p>
-        </div>
-        {currentUser && (currentUser.role === 'admin' || currentUser.role === 'class-rep') && (
-        <Button onClick={() => router.push('/documents/add')}>
-          <PlusCircle className="mr-2 h-4 w-4" /> Add Document
-        </Button>
-      )}
+      <header className="mb-8">
+        <h1 className="text-4xl font-bold font-headline text-primary flex items-center">
+          <BookCopy className="mr-3 h-10 w-10" /> Browse Units
+        </h1>
+        <p className="text-lg text-muted-foreground mt-2">
+          All units across your enrolled course servers.
+        </p>
       </header>
 
-      {allUnitsWithSemester.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {allUnitsWithSemester.map((unit) => (
-            <Link href={`/rooms/${unit.semesterId}/${unit.id}`} key={unit.id} className="block group">
-              <Card className={`h-48 ${getColorClassForUnit(unit.name)} text-white rounded-lg overflow-hidden relative transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl`}>
-                <CardHeader className="p-3 relative z-10">
-                  <CardTitle className="text-lg font-semibold truncate" title={unit.name}>{unit.name}</CardTitle>
-                  <CardDescription className="text-xs text-white/80 truncate" title={unit.semesterName}>{unit.semesterName}</CardDescription>
-                </CardHeader>
-                <div className="absolute bottom-0 right-0 transform translate-x-2 translate-y-2 rotate-[25deg] group-hover:rotate-[15deg] transition-transform duration-300">
-                   <Image
-                    src={`https://placehold.co/100x100.png?text=${encodeURIComponent(unit.name.substring(0,3))}`}
-                    alt="" 
-                    width={70}
-                    height={70}
-                    className="rounded shadow-md opacity-70 group-hover:opacity-90"
-                    data-ai-hint="abstract pattern"
-                  />
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      ) : (
+      {unitsByServer.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center">
-            <p className="text-xl text-muted-foreground">No units found.</p>
-            <p className="mt-2">Please check back later or contact an administrator if you believe this is an error.</p>
+            <Server className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+            <p className="text-xl text-muted-foreground">No course servers joined yet.</p>
+            <p className="mt-2 text-sm">Ask your class rep for a join code to get started.</p>
           </CardContent>
         </Card>
+      ) : (
+        <div className="space-y-10">
+          {unitsByServer.map(({ server, units }) => (
+            <section key={server.id}>
+              <div className="flex items-center gap-3 mb-4">
+                <Server className="h-5 w-5 text-primary" />
+                <h2 className="text-xl font-semibold font-headline">{server.name}</h2>
+                <Badge variant="secondary" className="font-mono text-xs">{server.code}</Badge>
+              </div>
+
+              {units.length === 0 ? (
+                <p className="text-sm text-muted-foreground ml-8">No units in this server yet.</p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 ml-8">
+                  {units.map((unit) => (
+                    <Link
+                      href={`/rooms/${server.id}/${unit.id}`}
+                      key={unit.id}
+                      className="block group"
+                    >
+                      <Card
+                        className={`h-40 ${getColorClass(unit.name)} text-white rounded-lg overflow-hidden relative transition-all duration-300 ease-in-out transform hover:scale-105 hover:shadow-xl`}
+                      >
+                        <CardHeader className="p-3 relative z-10">
+                          <CardTitle className="text-base font-semibold leading-tight" title={unit.name}>
+                            {unit.name}
+                          </CardTitle>
+                          {unit.unit_code && (
+                            <CardDescription className="text-xs text-white/80">
+                              {unit.unit_code}
+                            </CardDescription>
+                          )}
+                        </CardHeader>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </section>
+          ))}
+        </div>
       )}
     </div>
   );

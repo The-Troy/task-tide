@@ -1,0 +1,703 @@
+{
+  "info": {
+    "name": "TaskTide API",
+    "description": "Full API collection for the TaskTide backend. \n\n## Setup\n1. Set the `base_url` variable to `http://127.0.0.1:8000`\n2. Run **Register Class Rep** and **Register Student** first\n3. Tokens are auto-saved to `class_rep_token` and `student_token` variables\n4. All protected requests use `{{token}}` — switch between `{{class_rep_token}}` and `{{student_token}}` as needed",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url",         "value": "http://127.0.0.1:8000",  "type": "string" },
+    { "key": "class_rep_token",  "value": "",                       "type": "string" },
+    { "key": "student_token",    "value": "",                       "type": "string" },
+    { "key": "token",            "value": "{{class_rep_token}}",    "type": "string" },
+    { "key": "course_server_id", "value": "",                       "type": "string" },
+    { "key": "course_code",      "value": "",                       "type": "string" },
+    { "key": "unit_id",          "value": "",                       "type": "string" },
+    { "key": "document_id",      "value": "",                       "type": "string" },
+    { "key": "message_id",       "value": "",                       "type": "string" },
+    { "key": "invitation_token", "value": "",                       "type": "string" },
+    { "key": "group_id",         "value": "",                       "type": "string" }
+  ],
+  "item": [
+
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Register Class Rep",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('class_rep_token', json.token);",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    console.log('✅ Class Rep token saved:', json.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Alice Rep\",\n    \"email\": \"alice@tasktide.test\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\",\n    \"role\": \"class_rep\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] },
+            "description": "Registers a class representative. Token is auto-saved to `class_rep_token`."
+          }
+        },
+        {
+          "name": "Register Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('student_token', json.token);",
+                  "    console.log('✅ Student token saved:', json.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Bob Student\",\n    \"email\": \"bob@tasktide.test\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\",\n    \"role\": \"student\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] },
+            "description": "Registers a student. Token is auto-saved to `student_token`."
+          }
+        },
+        {
+          "name": "Register Student 2",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Carol Student\",\n    \"email\": \"carol@tasktide.test\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\",\n    \"role\": \"student\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/auth/register", "host": ["{{base_url}}"], "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    console.log('✅ Token saved:', json.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"alice@tasktide.test\",\n    \"password\": \"password123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/auth/login", "host": ["{{base_url}}"], "path": ["api", "auth", "login"] },
+            "description": "Login and auto-save token to `token` variable."
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/auth/me", "host": ["{{base_url}}"], "path": ["api", "auth", "me"] },
+            "description": "Returns authenticated user with their course servers, units, and teaching units."
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/auth/logout", "host": ["{{base_url}}"], "path": ["api", "auth", "logout"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "🏫 Course Servers",
+      "item": [
+        {
+          "name": "Create Course Server",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('course_server_id', json.course_server.id);",
+                  "    pm.collectionVariables.set('course_code', json.course_server.code);",
+                  "    console.log('✅ Server ID:', json.course_server.id, '| Code:', json.course_server.code);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Year 2 Computer Science\",\n    \"description\": \"Second year CS class — 2025/2026\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/course-servers", "host": ["{{base_url}}"], "path": ["api", "course-servers"] },
+            "description": "Class rep only. Auto-saves server ID and join code to collection variables."
+          }
+        },
+        {
+          "name": "List My Course Servers",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/course-servers", "host": ["{{base_url}}"], "path": ["api", "course-servers"] }
+          }
+        },
+        {
+          "name": "Show Course Server",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/course-servers/{{course_server_id}}", "host": ["{{base_url}}"], "path": ["api", "course-servers", "{{course_server_id}}"] }
+          }
+        },
+        {
+          "name": "Update Course Server",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Year 2 CS — Updated\",\n    \"description\": \"Updated description\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/course-servers/{{course_server_id}}", "host": ["{{base_url}}"], "path": ["api", "course-servers", "{{course_server_id}}"] }
+          }
+        },
+        {
+          "name": "Join Course Server (Student)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{student_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"{{course_code}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/course-servers/join", "host": ["{{base_url}}"], "path": ["api", "course-servers", "join"] },
+            "description": "Student joins using the 6-character code. Uses `student_token` automatically."
+          }
+        },
+        {
+          "name": "Leave Course Server (Student)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{student_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/course-servers/{{course_server_id}}/leave", "host": ["{{base_url}}"], "path": ["api", "course-servers", "{{course_server_id}}", "leave"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📚 Units",
+      "item": [
+        {
+          "name": "Create Unit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('unit_id', json.unit.id);",
+                  "    console.log('✅ Unit ID saved:', json.unit.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Data Structures & Algorithms\",\n    \"unit_code\": \"CS201\",\n    \"description\": \"Trees, graphs, sorting and complexity analysis\",\n    \"credits\": 3\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/course-servers/{{course_server_id}}/units", "host": ["{{base_url}}"], "path": ["api", "course-servers", "{{course_server_id}}", "units"] },
+            "description": "Class rep only. Auto-saves unit ID. All current server members are auto-enrolled."
+          }
+        },
+        {
+          "name": "List My Units",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/units", "host": ["{{base_url}}"], "path": ["api", "units"] }
+          }
+        },
+        {
+          "name": "Show Unit",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/units/{{unit_id}}", "host": ["{{base_url}}"], "path": ["api", "units", "{{unit_id}}"] }
+          }
+        },
+        {
+          "name": "Update Unit",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Data Structures & Algorithms — Updated\",\n    \"credits\": 4\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/units/{{unit_id}}", "host": ["{{base_url}}"], "path": ["api", "units", "{{unit_id}}"] }
+          }
+        },
+        {
+          "name": "Delete Unit",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/units/{{unit_id}}", "host": ["{{base_url}}"], "path": ["api", "units", "{{unit_id}}"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "📄 Documents",
+      "item": [
+        {
+          "name": "Upload Document",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('document_id', json.document.id);",
+                  "    console.log('✅ Document ID saved:', json.document.id);",
+                  "    console.log('📬 Email notification sent to all unit members (check storage/logs/laravel.log)');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title",         "value": "Week 1 — Introduction to Trees",  "type": "text" },
+                { "key": "document_type", "value": "lecture_notes",                   "type": "text" },
+                { "key": "file",          "src":   [],                                "type": "file", "description": "Select a PDF or any file (max 10MB)" }
+              ]
+            },
+            "url": { "raw": "{{base_url}}/api/units/{{unit_id}}/documents", "host": ["{{base_url}}"], "path": ["api", "units", "{{unit_id}}", "documents"] },
+            "description": "Uploads a document and notifies all unit members by email.\n\n**document_type options:**\n- `lecture_notes`\n- `past_papers`\n- `revision_materials`\n- `exam_timetable`\n- `lecture_timetable`\n- `other`\n\nCheck `storage/logs/laravel.log` to see the email notification."
+          }
+        },
+        {
+          "name": "List Documents in Unit",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/units/{{unit_id}}/documents", "host": ["{{base_url}}"], "path": ["api", "units", "{{unit_id}}", "documents"] }
+          }
+        },
+        {
+          "name": "Download Document",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/documents/{{document_id}}", "host": ["{{base_url}}"], "path": ["api", "documents", "{{document_id}}"] },
+            "description": "Downloads the file. Postman will display/save it automatically."
+          }
+        },
+        {
+          "name": "Delete Document",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/documents/{{document_id}}", "host": ["{{base_url}}"], "path": ["api", "documents", "{{document_id}}"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "💬 Messages (Chat)",
+      "item": [
+        {
+          "name": "Send Message",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('message_id', json.data.id);",
+                  "    console.log('✅ Message ID saved:', json.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"message\": \"When is the first assignment due?\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/units/{{unit_id}}/messages", "host": ["{{base_url}}"], "path": ["api", "units", "{{unit_id}}", "messages"] },
+            "description": "Sends a message and broadcasts it via Reverb WebSocket to all other connected users."
+          }
+        },
+        {
+          "name": "Get Messages (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/units/{{unit_id}}/messages?page=1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "units", "{{unit_id}}", "messages"],
+              "query": [{ "key": "page", "value": "1" }]
+            },
+            "description": "Returns 50 messages per page, oldest first."
+          }
+        },
+        {
+          "name": "Edit Message",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"message\": \"When is the first assignment due? (edited)\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/messages/{{message_id}}", "host": ["{{base_url}}"], "path": ["api", "messages", "{{message_id}}"] },
+            "description": "Only message owner can edit. Broadcasts update via WebSocket."
+          }
+        },
+        {
+          "name": "Delete Message",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/messages/{{message_id}}", "host": ["{{base_url}}"], "path": ["api", "messages", "{{message_id}}"] },
+            "description": "Owner or class rep can delete. Broadcasts deletion via WebSocket."
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "✉️ Invitations",
+      "item": [
+        {
+          "name": "Invite Lecturer to Unit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    pm.collectionVariables.set('invitation_token', json.invitation.token);",
+                  "    console.log('✅ Invitation token saved:', json.invitation.token);",
+                  "    console.log('📬 Check storage/logs/laravel.log for the invitation email');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"lecturer@tasktide.test\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/units/{{unit_id}}/invitations", "host": ["{{base_url}}"], "path": ["api", "units", "{{unit_id}}", "invitations"] },
+            "description": "Class rep only. Sends an invitation email. Invitation token is auto-saved.\n\nCheck `storage/logs/laravel.log` to see the email with the accept/reject URLs."
+          }
+        },
+        {
+          "name": "View Invitation (by token)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": { "raw": "{{base_url}}/api/invitations/{{invitation_token}}", "host": ["{{base_url}}"], "path": ["api", "invitations", "{{invitation_token}}"] },
+            "description": "Public route — no auth required. Used by the frontend to show invitation details before the user logs in."
+          }
+        },
+        {
+          "name": "Accept Invitation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/invitations/{{invitation_token}}/accept", "host": ["{{base_url}}"], "path": ["api", "invitations", "{{invitation_token}}", "accept"] },
+            "description": "The invited user must be logged in. Their email must match the invitation."
+          }
+        },
+        {
+          "name": "Reject Invitation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/invitations/{{invitation_token}}/reject", "host": ["{{base_url}}"], "path": ["api", "invitations", "{{invitation_token}}", "reject"] }
+          }
+        },
+        {
+          "name": "My Sent Invitations",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/invitations", "host": ["{{base_url}}"], "path": ["api", "invitations"] }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "👥 Groups (Assignment Grouping)",
+      "item": [
+        {
+          "name": "Auto-Setup Groups",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const json = pm.response.json();",
+                  "    if (json.groups && json.groups.length > 0) {",
+                  "        pm.collectionVariables.set('group_id', json.groups[0].id);",
+                  "        console.log('✅ First group ID saved:', json.groups[0].id);",
+                  "        console.log('📊 Total groups created:', json.groups.length);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"group_size\": 3\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/units/{{unit_id}}/groups/auto-setup", "host": ["{{base_url}}"], "path": ["api", "units", "{{unit_id}}", "groups", "auto-setup"] },
+            "description": "Class rep only. Randomly shuffles all enrolled students into groups of `group_size`.\n\nClears any existing groups first. First group ID is auto-saved."
+          }
+        },
+        {
+          "name": "List Groups in Unit",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/units/{{unit_id}}/groups", "host": ["{{base_url}}"], "path": ["api", "units", "{{unit_id}}", "groups"] },
+            "description": "Returns all groups with their members and an `is_full` flag."
+          }
+        },
+        {
+          "name": "Show Group",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/groups/{{group_id}}", "host": ["{{base_url}}"], "path": ["api", "groups", "{{group_id}}"] }
+          }
+        },
+        {
+          "name": "Rename / Resize Group",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Team Alpha\",\n    \"max_size\": 4\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": { "raw": "{{base_url}}/api/groups/{{group_id}}", "host": ["{{base_url}}"], "path": ["api", "groups", "{{group_id}}"] },
+            "description": "Class rep only. Both `name` and `max_size` are optional."
+          }
+        },
+        {
+          "name": "Student Joins a Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{student_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/groups/{{group_id}}/join", "host": ["{{base_url}}"], "path": ["api", "groups", "{{group_id}}", "join"] },
+            "description": "Student self-joins an open group. Fails if the group is full or student is already in another group for this unit."
+          }
+        },
+        {
+          "name": "Student Leaves Group",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{student_token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/groups/{{group_id}}/leave", "host": ["{{base_url}}"], "path": ["api", "groups", "{{group_id}}", "leave"] }
+          }
+        },
+        {
+          "name": "Delete All Groups in Unit",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{base_url}}/api/units/{{unit_id}}/groups", "host": ["{{base_url}}"], "path": ["api", "units", "{{unit_id}}", "groups"] },
+            "description": "Class rep only. Wipes all groups for a unit (e.g., before regenerating)."
+          }
+        }
+      ]
+    }
+
+  ]
+}

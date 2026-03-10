@@ -1,138 +1,151 @@
 "use client";
 
-import type { User, UserRole, Semester } from '@/lib/types';
-import { addNotification, addGroup as addGroupData, joinGroup as joinGroupData, semesters as staticSemesters, assignmentGroups, getUserByEmail, addUser } from '@/lib/data';
-import React, { createContext, useState, useCallback, ReactNode, useEffect } from 'react';
-import type { AssignmentGroup } from '@/lib/types';
+import React, { createContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { auth, getToken, removeToken, type ApiUser, type Role } from '@/lib/api';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type UserRole = 'student' | 'class_rep' | 'lecturer';
+
+export interface AppUser {
+  id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+}
 
 interface AppContextType {
-  currentUser: User | null;
+  currentUser: AppUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  role: UserRole;
-  setRole: (role: UserRole) => void;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: { name: string; email: string; password: string; role: UserRole }) => Promise<boolean>;
-  logout: () => void;
-  createNotification: (title: string, description: string, link?: string) => void;
-  createGroup: (groupDetails: Omit<AssignmentGroup, 'id' | 'members' | 'createdBy'>) => AssignmentGroup | null;
-  joinGroup: (groupId: string) => boolean;
-  semesters: Semester[];
+  register: (userData: {
+    name: string;
+    email: string;
+    password: string;
+    role: UserRole;
+  }) => Promise<boolean>;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function toAppUser(user: ApiUser): AppUser {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role as UserRole,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Context
+// ---------------------------------------------------------------------------
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [semesters, setSemesters] = useState<Semester[]>(staticSemesters); 
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // start true — restoring session
 
   const isAuthenticated = currentUser !== null;
-  const role = currentUser?.role || 'student';
 
-  const setRole = useCallback((newRole: UserRole) => {
-    if (currentUser) {
-      setCurrentUser({ ...currentUser, role: newRole });
+  // Restore session from localStorage token on mount
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      setIsLoading(false);
+      return;
     }
-  }, [currentUser]);
-  
+
+    auth.me()
+      .then(({ user }) => setCurrentUser(toAppUser(user)))
+      .catch(() => removeToken()) // token expired or invalid
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  // ------------------------------------------------------------------
+  // Login
+  // ------------------------------------------------------------------
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const user = getUserByEmail(email);
-    if (user && password === 'demo123') {
-      setCurrentUser(user);
-      setIsLoading(false);
+    try {
+      const { user } = await auth.login(email, password);
+      setCurrentUser(toAppUser(user));
       return true;
-    }
-    
-    setIsLoading(false);
-    return false;
-  }, []);
-
-  const register = useCallback(async (userData: { name: string; email: string; password: string; role: UserRole }): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    // Check if user already exists
-    const existingUser = getUserByEmail(userData.email);
-    if (existingUser) {
+    } catch {
+      return false;
+    } finally {
       setIsLoading(false);
+    }
+  }, []);
+
+  // ------------------------------------------------------------------
+  // Register
+  // ------------------------------------------------------------------
+  const register = useCallback(async (userData: {
+    name: string;
+    email: string;
+    password: string;
+    role: UserRole;
+  }): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const { user } = await auth.register({
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+        password_confirmation: userData.password,
+        role: userData.role,
+      });
+      setCurrentUser(toAppUser(user));
+      return true;
+    } catch {
       return false;
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Create new user
-    const newUser = addUser({
-      name: userData.name,
-      email: userData.email,
-      role: userData.role,
-    });
-    
-    setCurrentUser(newUser);
-    setIsLoading(false);
-    return true;
   }, []);
 
-  const logout = useCallback(() => {
-    setCurrentUser(null);
+  // ------------------------------------------------------------------
+  // Logout
+  // ------------------------------------------------------------------
+  const logout = useCallback(async (): Promise<void> => {
+    try {
+      await auth.logout();
+    } finally {
+      setCurrentUser(null);
+    }
   }, []);
 
-  const refreshSemesters = useCallback(() => {
-    setSemesters([...staticSemesters]);
+  // ------------------------------------------------------------------
+  // Refresh user (e.g. after role change)
+  // ------------------------------------------------------------------
+  const refreshUser = useCallback(async (): Promise<void> => {
+    try {
+      const { user } = await auth.me();
+      setCurrentUser(toAppUser(user));
+    } catch {
+      setCurrentUser(null);
+      removeToken();
+    }
   }, []);
-
-  useEffect(() => {
-    refreshSemesters();
-  }, [refreshSemesters]);
-
-  const createNotification = (title: string, description: string, link?: string) => {
-    addNotification(title, description, link);
-  };
-  
-  const createGroup = (groupDetails: Omit<AssignmentGroup, 'id' | 'members' | 'createdBy'>): AssignmentGroup | null => {
-    if (!currentUser || currentUser.role !== 'class_representative') {
-      console.error("Only class representatives can create groups.");
-      return null;
-    }
-    const newGroup = addGroupData(groupDetails, currentUser);
-    createNotification("New Group Created", `Group "${newGroup.assignmentName}" is now available.`, `/rooms/${newGroup.semesterId}/${newGroup.unitId}`);
-    return newGroup;
-  };
-
-  const joinGroup = (groupId: string): boolean => {
-    if (!currentUser || currentUser.role !== 'student') {
-      console.error("Only students can join groups.");
-      return false;
-    }
-    const success = joinGroupData(groupId, currentUser);
-    if (success) {
-      const joinedGroup = assignmentGroups.find(g => g.id === groupId);
-      if(joinedGroup) {
-         createNotification("Joined Group", `You have successfully joined the group: ${joinedGroup.assignmentName}.`, `/rooms/${joinedGroup.semesterId}/${joinedGroup.unitId}`);
-      }
-    }
-    return success;
-  };
 
   return (
-    <AppContext.Provider value={{ 
-        currentUser, 
-        isAuthenticated,
-        isLoading,
-        role,
-        setRole,
-        login,
-        register,
-        logout,
-        createNotification, 
-        createGroup, 
-        joinGroup,
-        semesters,
+    <AppContext.Provider value={{
+      currentUser,
+      isAuthenticated,
+      isLoading,
+      login,
+      register,
+      logout,
+      refreshUser,
     }}>
       {children}
     </AppContext.Provider>

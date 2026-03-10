@@ -27,8 +27,8 @@ export function UserNav() {
 
   const fallbackName = currentUser.name ? currentUser.name.substring(0, 2).toUpperCase() : "??";
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push("/login");
   };
 

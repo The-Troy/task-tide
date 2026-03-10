@@ -1,0 +1,39 @@
+# Laravel application
+/vendor/
+/node_modules/
+
+# Environment files — NEVER commit these (contain secrets)
+.env
+.env.*
+!.env.example
+
+# Compiled assets
+/public/hot
+/public/storage
+/storage/*.key
+
+# Logs
+/storage/logs/*.log
+
+# Laravel cache
+/bootstrap/cache/*.php
+/bootstrap/cache/*.json
+
+# Uploaded files (stored locally in dev)
+/storage/app/public/documents/
+
+# Testing
+/.phpunit.result.cache
+/coverage/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Sail
+docker-compose.override.yml
