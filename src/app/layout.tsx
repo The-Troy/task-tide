@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AppProvider } from '@/contexts/AppContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 import SplashScreen from '@/components/SplashScreen';
 
 export default function RootLayout({
@@ -31,7 +32,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased bg-gray-900">
+      <body className="font-body antialiased bg-gray-800">
         <AnimatePresence mode="wait">
           {showSplash ? (
             <motion.div
@@ -49,10 +50,12 @@ export default function RootLayout({
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5 }}
             >
-              <AppProvider>
-                {children}
-                <Toaster />
-              </AppProvider>
+              <AuthProvider>
+                <AppProvider>
+                  {children}
+                  <Toaster />
+                </AppProvider>
+              </AuthProvider>
             </motion.div>
           )}
         </AnimatePresence>

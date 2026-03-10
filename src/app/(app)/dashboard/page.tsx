@@ -78,7 +78,7 @@ export default function DashboardPage() {
         <CardHeader>
           <CardTitle className="text-2xl font-headline flex items-center">
             <Server className="mr-3 h-7 w-7 text-primary" />
-            Your Course Servers
+            Your Courses
           </CardTitle>
           <CardDescription>
             Servers you've created or joined ({servers.length} total)

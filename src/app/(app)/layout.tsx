@@ -34,8 +34,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-foreground mx-auto mb-4"></div>
+          <p className="text-gray-200">Loading...</p>
         </div>
       </div>
     );
@@ -59,7 +59,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-6 shadow-sm">
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-transparent px-6 shadow-sm">
           <SidebarTrigger className="md:hidden" />
           <div className="flex-1">
             {/* Optional: Breadcrumbs or page title can go here */}
@@ -74,7 +74,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <UserNav />
           </div>
         </header>
-        <main className="flex-1 flex-col p-6 bg-background">
+        <main className="flex-1 flex-col p-6 bg-transparent">
           {children}
         </main>
       </SidebarInset>
