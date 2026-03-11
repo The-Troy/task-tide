@@ -2,6 +2,9 @@
 import type { Course, Unit, DocumentFile, AssignmentGroup } from './types';
 
 // Mock data for demo purposes
+const getOrigin = () =>
+  typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+
 const mockCourses: Course[] = [
   {
     id: 'course1',
@@ -9,7 +12,7 @@ const mockCourses: Course[] = [
     year: '2025',
     semester: 'Spring',
     joinCode: 'BSC25-ABC',
-    joinLink: `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/join/BSC25-ABC`,
+    get joinLink() { return `${getOrigin()}/join/BSC25-ABC`; },
     createdBy: 'user_classrep_01',
     members: ['user_student_01'],
     createdAt: new Date().toISOString(),
@@ -24,7 +27,7 @@ const mockCourses: Course[] = [
     year: '2025',
     semester: 'Fall',
     joinCode: 'CSF25-XYZ',
-    joinLink: `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/join/CSF25-XYZ`,
+    get joinLink() { return `${getOrigin()}/join/CSF25-XYZ`; },
     createdBy: 'user_classrep_01',
     members: ['user_classrep_01'],
     createdAt: new Date().toISOString(),
@@ -63,7 +66,7 @@ export const createCourse = async (courseData: Omit<Course, 'id' | 'createdAt' |
   await new Promise(resolve => setTimeout(resolve, 500));
 
   const joinCode = generateJoinCode(courseData.name, courseData.year);
-  const joinLink = `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/join/${joinCode}`;
+  const joinLink = `${getOrigin()}/join/${joinCode}`;
 
   const newCourse: Course = {
     ...courseData,
@@ -162,3 +165,7 @@ export const getUserProfile = async (userId: string): Promise<User | null> => {
     return null;
   }
 };
+
+// Aliases used by the join page (server = course in this codebase)
+export const findServerByJoinCode = findCourseByJoinCode;
+export const addStudentToServer = addStudentToCourse;

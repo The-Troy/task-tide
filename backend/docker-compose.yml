@@ -7,41 +7,69 @@ services:
       dockerfile: Dockerfile
     container_name: tasktide_app
     restart: unless-stopped
-    working_dir: /var/www
-    volumes:
-      - .:/var/www
     ports:
-      - "8000:8000"
+      - "8000:8000" # HTTP (nginx)
+      - "8080:8080" # Laravel Reverb WebSockets
     depends_on:
-      - mysql
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_DATABASE=tasktide
-      - DB_USERNAME=root
-      - DB_PASSWORD=root
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      FRONTEND_URL: http://localhost:9002
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: tasktide
+      DB_USERNAME: tasktide
+      DB_PASSWORD: secret
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_DRIVER: redis
+      QUEUE_CONNECTION: database
+      SESSION_DRIVER: database
+      REVERB_APP_ID: tasktide
+      REVERB_APP_KEY: local_reverb_key
+      REVERB_APP_SECRET: local_reverb_secret
+      REVERB_HOST: 0.0.0.0
+      REVERB_PORT: 8080
+      REVERB_SCHEME: http
+    # APP_KEY must be set — generate with: php artisan key:generate --show
+    env_file:
+      - .env
 
-  mysql:
-    image: mysql:8.0
-    container_name: tasktide_mysql
+  db:
+    image: postgres:16-alpine
+    container_name: tasktide_db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: tasktide
+      POSTGRES_DB: tasktide
+      POSTGRES_USER: tasktide
+      POSTGRES_PASSWORD: secret
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/postgresql/data
     ports:
-      - "3306:3306"
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U tasktide" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   redis:
-    image: redis:alpine
+    image: redis:7-alpine
     container_name: tasktide_redis
     restart: unless-stopped
     ports:
       - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
 volumes:
   db_data:

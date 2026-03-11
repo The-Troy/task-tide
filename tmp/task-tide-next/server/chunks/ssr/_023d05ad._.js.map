@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 7, "column": 0}, "map": {"version":3,"sources":["file:///home/munde/Development/task-tide/src/app/%28app%29/rooms/layout.tsx"],"sourcesContent":["\n// This file is intentionally left blank or can be removed.\n// The default app layout from src/app/(app)/layout.tsx will apply to /rooms and its children.\n// No specific layout is needed for the /rooms segment if we are adopting the Spotify-style browse page.\nexport default function RoomsBaseLayout({ children }: { children: React.ReactNode }) {\n  return <>{children}</>;\n}\n"],"names":[],"mappings":"AACA,2DAA2D;AAC3D,8FAA8F;AAC9F,wGAAwG;;;;;;AACzF,SAAS,gBAAgB,EAAE,QAAQ,EAAiC;IACjF,qBAAO;kBAAG;;AACZ","debugId":null}},
+    {"offset": {"line": 25, "column": 0}, "map": {"version":3,"sources":["file:///home/munde/Development/task-tide/node_modules/next/src/server/route-modules/app-page/vendored/rsc/react-jsx-dev-runtime.ts"],"sourcesContent":["module.exports = require('../../module.compiled').vendored[\n  'react-rsc'\n].ReactJsxDevRuntime\n"],"names":["module","exports","require","vendored","ReactJsxDevRuntime"],"mappings":";AAAAA,OAAOC,OAAO,GAAGC,QAAQ,4HAAyBC,QAAQ,CACxD,YACD,CAACC,kBAAkB","ignoreList":[0],"debugId":null}}]
+}
