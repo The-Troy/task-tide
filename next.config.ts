@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
   // Change back to '.next' if you need build artifacts to persist across reboots.
   distDir: process.env.NODE_ENV === 'production' ? '.next' : '/tmp/task-tide-next',
 
+  // Produce a self-contained build for Docker/fly.io deployment.
+  // The .next/standalone directory can be run with: node server.js
+  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
+
   typescript: {
     ignoreBuildErrors: true,
   },
