@@ -1,140 +1,154 @@
 "use client";
 
-import type { User, UserRole, Semester } from '@/lib/types';
-import { addNotification, addGroup as addGroupData, joinGroup as joinGroupData, semesters as staticSemesters, assignmentGroups } from '@/lib/data';
-import React, { createContext, useState, useCallback, ReactNode, useEffect } from 'react';
-import type { AssignmentGroup } from '@/lib/types';
-import { useAuth } from './AuthContext';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth } from '@/firebaseConfig';
-import { createUserProfile } from '@/lib/firestore';
+import React, { createContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { auth, getToken, removeToken, type ApiUser, type Role } from '@/lib/api';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export type UserRole = 'student' | 'class_rep' | 'lecturer';
+
+export interface AppUser {
+  id: number;
+  name: string;
+  email: string;
+  role: UserRole;
+}
 
 interface AppContextType {
-  currentUser: User | null;
+  currentUser: AppUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  role: UserRole;
-  setRole: (role: UserRole) => void;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: { name: string; email: string; password: string; role: UserRole }) => Promise<boolean>;
-  logout: () => void;
-  createNotification: (title: string, description: string, link?: string) => void;
-  createGroup: (groupDetails: Omit<AssignmentGroup, 'id' | 'members' | 'createdBy'>) => AssignmentGroup | null;
-  joinGroup: (groupId: string) => boolean;
-  semesters: Semester[];
+  register: (userData: {
+    name: string;
+    email: string;
+    password: string;
+  }) => Promise<void>;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
+  updateProfile: (name: string) => Promise<void>;
 }
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function toAppUser(user: ApiUser): AppUser {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role as UserRole,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Context
+// ---------------------------------------------------------------------------
 
 export const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const { user, userProfile, loading: authLoading, logout: authLogout } = useAuth();
-  const [semesters, setSemesters] = useState<Semester[]>(staticSemesters);
+  const [currentUser, setCurrentUser] = useState<AppUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true); // start true — restoring session
 
-  // Use userProfile from AuthContext as the source of truth for currentUser
-  const currentUser = userProfile;
-  // Use Firebase user for authentication check to avoid redirect loop if profile is missing/loading
-  const isAuthenticated = !!user;
-  const role = currentUser?.role || 'student';
-  const isLoading = authLoading;
+  const isAuthenticated = currentUser !== null;
 
-  // This is now mostly a read-only setter or for local optimistic updates if needed, 
-  // but ideally role should come from Firestore.
-  const setRole = useCallback((newRole: UserRole) => {
-    console.warn("setRole called but role is now managed via Firestore/AuthContext");
+  // Restore session from localStorage token on mount
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+
+    auth.me()
+      .then(({ user }) => setCurrentUser(toAppUser(user)))
+      .catch(() => removeToken()) // token expired or invalid
+      .finally(() => setIsLoading(false));
   }, []);
 
+  // ------------------------------------------------------------------
+  // Login
+  // ------------------------------------------------------------------
   const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const { user } = await auth.login(email, password);
+      setCurrentUser(toAppUser(user));
       return true;
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch {
       return false;
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  const register = useCallback(async (userData: { name: string; email: string; password: string; role: UserRole }): Promise<boolean> => {
+  // ------------------------------------------------------------------
+  // Register
+  // ------------------------------------------------------------------
+  const register = useCallback(async (userData: {
+    name: string;
+    email: string;
+    password: string;
+  }): Promise<void> => {
+    setIsLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
-      const firebaseUser = userCredential.user;
-
-      await updateProfile(firebaseUser, {
-        displayName: userData.name
-      });
-
-      // Create user profile in Firestore
-      const newUser: User = {
-        id: firebaseUser.uid,
+      const { user } = await auth.register({
         name: userData.name,
         email: userData.email,
-        role: userData.role,
-        avatarUrl: 'https://placehold.co/100x100.png', // Default avatar
-      };
-
-      await createUserProfile(newUser);
-
-      return true;
-    } catch (error: any) {
-      console.error("Registration error:", error);
-      throw error; // Throw error so UI can handle it
+        password: userData.password,
+      });
+      setCurrentUser(toAppUser(user));
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  const logout = useCallback(async () => {
-    await authLogout();
-  }, [authLogout]);
-
-  const refreshSemesters = useCallback(() => {
-    setSemesters([...staticSemesters]);
+  // ------------------------------------------------------------------
+  // Logout
+  // ------------------------------------------------------------------
+  const logout = useCallback(async (): Promise<void> => {
+    try {
+      await auth.logout();
+    } finally {
+      setCurrentUser(null);
+    }
   }, []);
 
-  useEffect(() => {
-    refreshSemesters();
-  }, [refreshSemesters]);
-
-  const createNotification = (title: string, description: string, link?: string) => {
-    addNotification(title, description, link);
-  };
-
-  const createGroup = (groupDetails: Omit<AssignmentGroup, 'id' | 'members' | 'createdBy'>): AssignmentGroup | null => {
-    if (!currentUser || currentUser.role !== 'class_representative') {
-      console.error("Only class representatives can create groups.");
-      return null;
+  // ------------------------------------------------------------------
+  // Refresh user (e.g. after role change)
+  // ------------------------------------------------------------------
+  const refreshUser = useCallback(async (): Promise<void> => {
+    try {
+      const { user } = await auth.me();
+      setCurrentUser(toAppUser(user));
+    } catch {
+      setCurrentUser(null);
+      removeToken();
     }
-    const newGroup = addGroupData(groupDetails, currentUser);
-    createNotification("New Group Created", `Group "${newGroup.assignmentName}" is now available.`, `/rooms/${newGroup.semesterId}/${newGroup.unitId}`);
-    return newGroup;
-  };
+  }, []);
 
-  const joinGroup = (groupId: string): boolean => {
-    if (!currentUser || currentUser.role !== 'student') {
-      console.error("Only students can join groups.");
-      return false;
-    }
-    const success = joinGroupData(groupId, currentUser);
-    if (success) {
-      const joinedGroup = assignmentGroups.find(g => g.id === groupId);
-      if (joinedGroup) {
-        createNotification("Joined Group", `You have successfully joined the group: ${joinedGroup.assignmentName}.`, `/rooms/${joinedGroup.semesterId}/${joinedGroup.unitId}`);
-      }
-    }
-    return success;
-  };
+  // ------------------------------------------------------------------
+  // Update profile name
+  // ------------------------------------------------------------------
+  const updateProfile = useCallback(async (name: string): Promise<void> => {
+    const { user } = await auth.updateProfile(name);
+    setCurrentUser(toAppUser(user));
+  }, []);
 
   return (
     <AppContext.Provider value={{
       currentUser,
       isAuthenticated,
       isLoading,
-      role,
-      setRole,
       login,
       register,
       logout,
-      createNotification,
-      createGroup,
-      joinGroup,
-      semesters,
+      refreshUser,
+      updateProfile,
     }}>
       {children}
     </AppContext.Provider>

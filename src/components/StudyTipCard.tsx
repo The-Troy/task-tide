@@ -3,59 +3,48 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Lightbulb, RefreshCw } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
-const fallbackTips = [
-{ text: "🌟 Your learning journey is unique — trust the process.", author: "TaskTide Team 💜" },
-  { text: "🚦 Start where you are, use what you have, do what you can.", author: "TaskTide Team 💜" },
-  { text: "🖋️ Journaling your progress makes you more mindful.", author: "TaskTide Team 💜" },
-  { text: "🔍 Focus on quality over quantity — deep work wins.", author: "TaskTide Team 💜" },
-  { text: "🎯 One goal at a time — multitasking drains focus.", author: "TaskTide Team 💜" },
-  { text: "🧃 Water + Brain = Productivity Boost 💡", author: "TaskTide Team 💜" },
-  { text: "🏁 Done is better than perfect — progress matters.", author: "TaskTide Team 💜" },
-  { text: "🧠 Stretch your brain with a puzzle or riddle today.", author: "TaskTide Team 💜" },
-  { text: "💻 Practice daily — coding is a muscle too!", author: "TaskTide Team 💜" },
-  { text: "📖 Slow down when reading — understanding > speed.", author: "TaskTide Team 💜" },
-  { text: "🌱 Mistakes are fertilizer — they help you grow.", author: "TaskTide Team 💜" },
-  { text: "🎧 Use soundscapes or white noise to focus better.", author: "TaskTide Team 💜" },
-  { text: "🧭 Know your why — it fuels your study sessions.", author: "TaskTide Team 💜" },
-  { text: "⏰ The best time to start was yesterday. The next best time is now.", author: "TaskTide Team 💜" },
-  { text: "🧘 Calm mind = sharp mind — breathe for a minute before you start.", author: "TaskTide Team 💜" },
-  { text: "📆 Build streaks — consistency is addictive.", author: "TaskTide Team 💜" },
-  { text: "🎨 Add color to your notes — visual memory is powerful.", author: "TaskTide Team 💜" },
-  { text: "🚀 Small consistent actions beat rare bursts of effort.", author: "TaskTide Team 💜" },
-  { text: "💬 Teach a friend — you'll learn twice.", author: "TaskTide Team 💜" },
-  { text: "📦 Break big projects into micro-tasks and celebrate each step 🎉.", author: "TaskTide Team 💜" },
-  { text: "🖼️ Visualize success — your brain works toward what it sees.", author: "TaskTide Team 💜" },
-  { text: "🔑 Preparation unlocks confidence before exams.", author: "TaskTide Team 💜" },
-  { text: "🧃 Snack smart — fuel your focus, not just your hunger.", author: "TaskTide Team 💜" },
-  { text: "📚 Reread with intention — look for something new each time.", author: "TaskTide Team 💜" },
-  { text: "🧠 Keep a 'question notebook' — curiosity grows knowledge.", author: "TaskTide Team 💜" },
-  { text: "🎯 Focused action today makes tomorrow easier.", author: "TaskTide Team 💜" },
-  { text: "🌙 A good night’s sleep is your secret study hack.", author: "TaskTide Team 💜" },
-  { text: "🕰️ Start early, finish early — reward yourself with free time.", author: "TaskTide Team 💜" },
-  { text: "💡 Experiment with study methods until one clicks.", author: "TaskTide Team 💜" },
-  { text: "🎶 Try instrumental playlists — lyrics can distract.", author: "TaskTide Team 💜" },
-  { text: "📖 Repetition is the mother of learning.", author: "TaskTide Team 💜" },
-  { text: "🚴 Exercise boosts memory and learning ability 🧠.", author: "TaskTide Team 💜" },
-  { text: "🌍 Learn about something outside your comfort zone today.", author: "TaskTide Team 💜" },
-  { text: "🧩 Keep a balance — mental health fuels productivity.", author: "TaskTide Team 💜" },
-  { text: "📌 Write down distractions — deal with them later.", author: "TaskTide Team 💜" },
-  { text: "✨ Every day is a fresh page — write something amazing.", author: "TaskTide Team 💜" },
-  { text: "🏗️ Build knowledge brick by brick, day by day.", author: "TaskTide Team 💜" },
-  { text: "🌞 Morning review sets the tone for the day.", author: "TaskTide Team 💜" },
-  { text: "📊 Measure your progress weekly — celebrate growth!", author: "TaskTide Team 💜" },
-  { text: "🧠 Memory improves with active recall — quiz yourself often.", author: "TaskTide Team 💜" },
-  { text: "🔋 Recharge before you burn out — breaks are batteries.", author: "TaskTide Team 💜" },
-  { text: "🚧 Hard work compounds — you’re building a future you.", author: "TaskTide Team 💜" },
-  { text: "📎 Link new ideas to what you already know — memory loves connections.", author: "TaskTide Team 💜" },
-  { text: "🧃 Stay refreshed — brain fog is just dehydration in disguise.", author: "TaskTide Team 💜" },
-  { text: "🎯 Your effort today is an investment in tomorrow.", author: "TaskTide Team 💜" },
+const tips = [
+  "Your learning journey is unique — trust the process.",
+  "Start where you are, use what you have, do what you can.",
+  "Journaling your progress makes you more mindful.",
+  "Focus on quality over quantity — deep work wins.",
+  "One goal at a time — multitasking drains focus.",
+  "Done is better than perfect — progress matters.",
+  "Stretch your brain with a puzzle or riddle today.",
+  "Practice daily — coding is a muscle too!",
+  "Slow down when reading — understanding beats speed.",
+  "Mistakes are fertilizer — they help you grow.",
+  "Know your why — it fuels your study sessions.",
+  "The best time to start was yesterday. The next best time is now.",
+  "Calm mind = sharp mind — breathe for a minute before you start.",
+  "Build streaks — consistency is addictive.",
+  "Add colour to your notes — visual memory is powerful.",
+  "Small consistent actions beat rare bursts of effort.",
+  "Teach a friend — you'll learn twice.",
+  "Break big projects into micro-tasks and celebrate each step.",
+  "Visualise success — your brain works toward what it sees.",
+  "Preparation unlocks confidence before exams.",
+  "Reread with intention — look for something new each time.",
+  "Keep a question notebook — curiosity grows knowledge.",
+  "A good night's sleep is your secret study hack.",
+  "Start early, finish early — reward yourself with free time.",
+  "Repetition is the mother of learning.",
+  "Exercise boosts memory and learning ability.",
+  "Keep a balance — mental health fuels productivity.",
+  "Write down distractions — deal with them later.",
+  "Every day is a fresh page — write something amazing.",
+  "Build knowledge brick by brick, day by day.",
+  "Memory improves with active recall — quiz yourself often.",
+  "Recharge before you burn out — breaks are batteries.",
+  "Hard work compounds — you're building a future you.",
+  "Link new ideas to what you already know — memory loves connections.",
+  "Your effort today is an investment in tomorrow.",
 ];
 
-
-
-// ✅ List of images (add them in /public/images/study-tips/)
 const images = [
   "/images/study-tips/tip1.jpg",
   "/images/study-tips/tip2.jpg",
@@ -65,59 +54,82 @@ const images = [
   "/images/study-tips/tip6.jpg",
 ];
 
+function random<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 export default function StudyTipCard() {
-  const [quote, setQuote] = useState(fallbackTips[0].text);
-  const [author, setAuthor] = useState(fallbackTips[0].author);
+  const [tip, setTip] = useState(tips[0]);
   const [image, setImage] = useState(images[0]);
 
-  function getRandomQuote() {
-    const randomQuote = fallbackTips[Math.floor(Math.random() * fallbackTips.length)];
-    const randomImage = images[Math.floor(Math.random() * images.length)];
-
-    setQuote(randomQuote.text);
-    setAuthor(randomQuote.author);
-    setImage(randomImage);
+  function next() {
+    setTip(random(tips));
+    setImage(random(images));
   }
 
-  useEffect(() => {
-    getRandomQuote();
-  }, []);
+  useEffect(() => { next(); }, []);
 
   return (
-    <motion.div
-      className="mt-8 p-6 rounded-2xl shadow-xl bg-[#26415E]"
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-semibold text-primary">💜 Study Tip of the Day</h3>
-        <Button variant="outline" size="sm" onClick={getRandomQuote}>
-          🔄 New Quote
-        </Button>
-      </div>
+    <Card className="shadow-lg overflow-hidden">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg font-headline flex items-center gap-2 text-primary">
+            <Lightbulb className="h-5 w-5" />
+            Study Tip of the Day
+          </CardTitle>
+          <Button variant="ghost" size="sm" onClick={next} className="gap-1.5 text-muted-foreground hover:text-foreground">
+            <RefreshCw className="h-3.5 w-3.5" />
+            New tip
+          </Button>
+        </div>
+      </CardHeader>
 
-      <div className="flex flex-col sm:flex-row items-start gap-4">
-        <Image
-          src={image}
-          alt="Study tip illustration"
-          width={200}
-          height={200}
-          className="rounded-full object-cover shadow-md"
-        />
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={quote}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-          >
-            <p className="text-foreground italic text-lg">{quote}</p>
-            <p className="text-sm text-muted-foreground mt-2">{author}</p>
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    </motion.div>
+      <CardContent>
+        <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
+          {/* Image */}
+          <div className="shrink-0">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={image}
+                initial={{ opacity: 0, scale: 0.92 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.92 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Image
+                  src={image}
+                  alt="Study illustration"
+                  width={120}
+                  height={120}
+                  className="rounded-xl object-cover w-[120px] h-[120px]"
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Quote */}
+          <div className="flex flex-col justify-center">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={tip}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="border-l-4 border-primary pl-4">
+                  <p className="text-base text-foreground leading-relaxed italic">
+                    &ldquo;{tip}&rdquo;
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2 font-medium">
+                    — TaskTide Team
+                  </p>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

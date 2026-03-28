@@ -19,13 +19,11 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/hooks/useAppContext";
 import { Plus, Copy, ExternalLink, School, ArrowLeft } from "lucide-react";
-import { createCourseServer } from "@/lib/firestore";
-import type { CourseServer } from "@/lib/types";
+import { courseServers, type ApiCourseServer } from "@/lib/api";
 
 const serverSchema = z.object({
   name: z.string().min(3, "Course name must be at least 3 characters"),
-  year: z.string().min(4, "Year must be at least 4 characters"),
-  semester: z.string().min(1, "Semester is required"),
+  description: z.string().optional(),
 });
 
 type ServerFormValues = z.infer<typeof serverSchema>;
@@ -37,7 +35,7 @@ interface CreateServerFormProps {
 
 export function CreateServerForm({ onServerCreated, onCancel }: CreateServerFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [createdServer, setCreatedServer] = useState<CourseServer | null>(null);
+  const [createdServer, setCreatedServer] = useState<ApiCourseServer | null>(null);
   const { currentUser } = useAppContext();
   const { toast } = useToast();
 
@@ -45,8 +43,7 @@ export function CreateServerForm({ onServerCreated, onCancel }: CreateServerForm
     resolver: zodResolver(serverSchema),
     defaultValues: {
       name: "",
-      year: "",
-      semester: "",
+      description: "",
     },
   });
 
@@ -55,27 +52,23 @@ export function CreateServerForm({ onServerCreated, onCancel }: CreateServerForm
 
     setIsLoading(true);
     try {
-      const server = await createCourseServer({
+      const { course_server: server } = await courseServers.create({
         name: data.name,
-        year: data.year,
-        semester: data.semester,
-        createdBy: currentUser.id,
-        members: [currentUser.id],
-        maxGroupsPerUnit: 50,
+        description: data.description,
       });
-      
+
       setCreatedServer(server);
-      
+
       toast({
         title: "Course Server Created!",
         description: `${server.name} has been created successfully.`,
       });
-      
+
       form.reset();
-    } catch (error) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: "Failed to create course server. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to create course server.",
         variant: "destructive",
       });
     } finally {
@@ -91,9 +84,9 @@ export function CreateServerForm({ onServerCreated, onCancel }: CreateServerForm
     });
   };
 
-  const handleComplete = () => {
-    onServerCreated();
-  };
+  const joinLink = createdServer
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/join/${createdServer.code}`
+    : "";
 
   if (createdServer) {
     return (
@@ -104,55 +97,55 @@ export function CreateServerForm({ onServerCreated, onCancel }: CreateServerForm
             Course Server Created!
           </CardTitle>
           <CardDescription>
-            Your course server has been created successfully. Share the join code with your classmates.
+            Your course server has been created. Share the join code with your classmates.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <Card className="bg-muted/50">
             <CardHeader>
               <CardTitle className="text-lg">{createdServer.name}</CardTitle>
-              <CardDescription>
-                {createdServer.year} • {createdServer.semester}
-              </CardDescription>
+              {createdServer.description && (
+                <CardDescription>{createdServer.description}</CardDescription>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
                 <Label className="text-sm font-medium">Join Code</Label>
                 <div className="flex items-center space-x-2 mt-1">
                   <Input
-                    value={createdServer.joinCode}
+                    value={createdServer.code}
                     readOnly
                     className="font-mono"
                   />
                   <Button
                     size="icon"
                     variant="outline"
-                    onClick={() => copyToClipboard(createdServer.joinCode, "Join code")}
+                    onClick={() => copyToClipboard(createdServer.code, "Join code")}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
-              
+
               <div>
                 <Label className="text-sm font-medium">Join Link</Label>
                 <div className="flex items-center space-x-2 mt-1">
                   <Input
-                    value={createdServer.joinLink}
+                    value={joinLink}
                     readOnly
                     className="text-xs"
                   />
                   <Button
                     size="icon"
                     variant="outline"
-                    onClick={() => copyToClipboard(createdServer.joinLink, "Join link")}
+                    onClick={() => copyToClipboard(joinLink, "Join link")}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
                   <Button
                     size="icon"
                     variant="outline"
-                    onClick={() => window.open(createdServer.joinLink, '_blank')}
+                    onClick={() => window.open(joinLink, "_blank")}
                   >
                     <ExternalLink className="h-4 w-4" />
                   </Button>
@@ -160,9 +153,9 @@ export function CreateServerForm({ onServerCreated, onCancel }: CreateServerForm
               </div>
             </CardContent>
           </Card>
-          
+
           <div className="flex justify-center">
-            <Button onClick={handleComplete} size="lg">
+            <Button onClick={onServerCreated} size="lg">
               Continue to Dashboard
             </Button>
           </div>
@@ -207,35 +200,21 @@ export function CreateServerForm({ onServerCreated, onCancel }: CreateServerForm
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
-              name="year"
+              name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Year</FormLabel>
+                  <FormLabel>Description (optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., 2025" {...field} />
+                    <Input placeholder="e.g., Year 2 – Semester 1" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
-            <FormField
-              control={form.control}
-              name="semester"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Semester</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Spring, Fall, Semester 1" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
+
             <div className="flex justify-end space-x-2 pt-4">
               {onCancel && (
                 <Button

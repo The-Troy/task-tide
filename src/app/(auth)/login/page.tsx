@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/hooks/useAppContext";
 import { LogIn, Eye, EyeOff } from "lucide-react";
@@ -41,7 +40,7 @@ export default function LoginPage() {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Something went wrong. Please try again.",
@@ -54,7 +53,7 @@ export default function LoginPage() {
 
   return (
     <>
-      <CardHeader className="text-center pb-6">
+      <CardHeader className="text-center pb-6 px-0">
         <CardTitle className="text-2xl font-headline">Welcome Back</CardTitle>
         <CardDescription>
           Sign in to your TaskTide account to continue
@@ -72,6 +71,7 @@ export default function LoginPage() {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={isLoading}
+            autoComplete="email"
           />
         </div>
 
@@ -86,6 +86,7 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isLoading}
+              autoComplete="current-password"
             />
             <Button
               type="button"
@@ -106,7 +107,10 @@ export default function LoginPage() {
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
-            "Signing in..."
+            <span className="flex items-center gap-2">
+              <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+              Signing in...
+            </span>
           ) : (
             <>
               <LogIn className="mr-2 h-4 w-4" />
@@ -118,7 +122,7 @@ export default function LoginPage() {
 
       <div className="text-center mt-6">
         <p className="text-sm text-muted-foreground">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/signup" className="text-primary hover:underline font-medium">
             Sign up
           </Link>

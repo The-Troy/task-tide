@@ -25,10 +25,9 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/hooks/useAppContext";
-import { UserPlus, CheckCircle, Users } from "lucide-react";
+import { UserPlus, CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { findClassroomByJoinCode, addStudentToClassroom, addClassroomToStudent } from "@/lib/firestore";
-import type { Classroom } from "@/lib/types";
+import { courseServers, type ApiCourseServer } from "@/lib/api";
 
 const joinSchema = z.object({
   joinCode: z.string().min(1, "Join code is required"),
@@ -37,88 +36,41 @@ const joinSchema = z.object({
 type JoinFormValues = z.infer<typeof joinSchema>;
 
 interface JoinClassroomFormProps {
-  onClassroomJoined?: (classroom: Classroom) => void;
+  onClassroomJoined?: (server: ApiCourseServer) => void;
 }
 
 export function JoinClassroomForm({ onClassroomJoined }: JoinClassroomFormProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [joinedClassroom, setJoinedClassroom] = useState<Classroom | null>(null);
+  const [joinedServer, setJoinedServer] = useState<ApiCourseServer | null>(null);
   const { currentUser } = useAppContext();
   const { toast } = useToast();
   const router = useRouter();
 
   const form = useForm<JoinFormValues>({
     resolver: zodResolver(joinSchema),
-    defaultValues: {
-      joinCode: "",
-    },
+    defaultValues: { joinCode: "" },
   });
 
-  const findClassroomByCode = async (joinCode: string): Promise<Classroom | null> => {
-    return await findClassroomByJoinCode(joinCode);
-  };
-
-  const joinClassroom = async (classroom: Classroom): Promise<void> => {
-    if (!currentUser) return;
-    
-    // Add student to classroom and classroom to student
-    await addStudentToClassroom(classroom.id, currentUser.id);
-    await addClassroomToStudent(currentUser.id, classroom.id);
-    
-    // Update local state
-    if (!classroom.members.includes(currentUser.id)) {
-      classroom.members.push(currentUser.id);
-    }
-  };
-
   const onSubmit = async (data: JoinFormValues) => {
-    if (!currentUser || currentUser.role !== 'student') {
-      toast({
-        title: "Permission Denied",
-        description: "Only students can join classrooms.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!currentUser) return;
 
     setIsLoading(true);
     try {
-      const classroom = await findClassroomByCode(data.joinCode);
-      
-      if (!classroom) {
-        toast({
-          title: "Invalid Code",
-          description: "The join code you entered is not valid. Please check and try again.",
-          variant: "destructive",
-        });
-        return;
-      }
+      const { course_server: server } = await courseServers.join(data.joinCode.toUpperCase());
+      setJoinedServer(server);
+      onClassroomJoined?.(server);
 
-      // Check if already a member
-      if (classroom.members.includes(currentUser.id)) {
-        toast({
-          title: "Already Joined",
-          description: "You are already a member of this classroom.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      await joinClassroom(classroom);
-      setJoinedClassroom(classroom);
-      onClassroomJoined?.(classroom);
-      
       toast({
         title: "Successfully Joined!",
-        description: `You have joined ${classroom.name}.`,
+        description: `You have joined ${server.name}.`,
       });
-      
+
       form.reset();
-    } catch (error) {
+    } catch (error: unknown) {
       toast({
         title: "Error",
-        description: "Failed to join classroom. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to join. Check the code and try again.",
         variant: "destructive",
       });
     } finally {
@@ -128,19 +80,16 @@ export function JoinClassroomForm({ onClassroomJoined }: JoinClassroomFormProps)
 
   const handleClose = () => {
     setIsOpen(false);
-    setJoinedClassroom(null);
+    setJoinedServer(null);
     form.reset();
   };
 
-  const goToClassroom = () => {
-    if (joinedClassroom) {
-      // Navigate to classroom page - in real app, this would be the actual classroom route
-      router.push(`/rooms`); // For now, redirect to rooms as placeholder
-      handleClose();
-    }
+  const goToServer = () => {
+    router.push("/rooms");
+    handleClose();
   };
 
-  if (joinedClassroom) {
+  if (joinedServer) {
     return (
       <Dialog open={isOpen} onOpenChange={handleClose}>
         <DialogTrigger asChild>
@@ -156,32 +105,22 @@ export function JoinClassroomForm({ onClassroomJoined }: JoinClassroomFormProps)
               Successfully Joined!
             </DialogTitle>
             <DialogDescription>
-              You have successfully joined the classroom. You can now access units, documents, and groups.
+              You can now access units, documents, and groups.
             </DialogDescription>
           </DialogHeader>
-          
+
           <Card className="mt-4">
             <CardHeader>
-              <CardTitle className="text-lg">{joinedClassroom.name}</CardTitle>
-              <CardDescription>
-                {joinedClassroom.year} • {joinedClassroom.semester}
-              </CardDescription>
+              <CardTitle className="text-lg">{joinedServer.name}</CardTitle>
+              {joinedServer.description && (
+                <CardDescription>{joinedServer.description}</CardDescription>
+              )}
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Users className="mr-2 h-4 w-4" />
-                {joinedClassroom.members.length} member{joinedClassroom.members.length !== 1 ? 's' : ''}
-              </div>
-            </CardContent>
           </Card>
-          
+
           <div className="flex justify-end space-x-2 mt-6">
-            <Button variant="outline" onClick={handleClose}>
-              Close
-            </Button>
-            <Button onClick={goToClassroom}>
-              Go to Classroom
-            </Button>
+            <Button variant="outline" onClick={handleClose}>Close</Button>
+            <Button onClick={goToServer}>Go to Classroom</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -203,10 +142,10 @@ export function JoinClassroomForm({ onClassroomJoined }: JoinClassroomFormProps)
             Join a Classroom
           </DialogTitle>
           <DialogDescription>
-            Enter the join code provided by your class representative to join a classroom.
+            Enter the join code provided by your class representative.
           </DialogDescription>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-4">
             <FormField
@@ -216,8 +155,8 @@ export function JoinClassroomForm({ onClassroomJoined }: JoinClassroomFormProps)
                 <FormItem>
                   <FormLabel>Join Code</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="e.g., BIT25-ABC" 
+                    <Input
+                      placeholder="e.g., BIT-ABC1"
                       className="font-mono uppercase"
                       {...field}
                       onChange={(e) => field.onChange(e.target.value.toUpperCase())}
@@ -227,24 +166,9 @@ export function JoinClassroomForm({ onClassroomJoined }: JoinClassroomFormProps)
                 </FormItem>
               )}
             />
-            
-            <div className="bg-muted/50 p-3 rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                💡 <strong>Demo codes to try:</strong>
-              </p>
-              <div className="mt-1 space-y-1">
-                <p className="text-xs font-mono">BIT25-ABC</p>
-                <p className="text-xs font-mono">CSF25-XYZ</p>
-              </div>
-            </div>
-            
+
             <div className="flex justify-end space-x-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsOpen(false)}
-                disabled={isLoading}
-              >
+              <Button type="button" variant="outline" onClick={() => setIsOpen(false)} disabled={isLoading}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>

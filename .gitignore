@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -17,8 +17,12 @@
 /.next/
 /out/
 
+# dev build temp
+/tmp/
+
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -37,10 +41,27 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.genkit/*
-.env*
+# genkit
+.genkit/
+
+# env — secrets; keep *.example tracked
+.env
+.env.*
+!.env.example
+!**/.env.example
 
 # firebase
 firebase-debug.log
 firestore-debug.log
-.env
+
+# turbo / caches
+.turbo
+.eslintcache
+
+# local tooling / IDE noise
+.agent/
+.idx/
+.modified
+.idea/
+*.swp
+*.swo

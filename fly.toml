@@ -1,0 +1,35 @@
+# fly.toml — tasktide-web (Next.js frontend)
+app = "tasktide-web"
+primary_region = "jnb"  # Same region as the API for low-latency
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT     = "3000"
+  # Points to the backend API — update if you use a custom domain
+  NEXT_PUBLIC_API_URL = "https://tasktide-api.fly.dev"
+
+[[services]]
+  internal_port = 3000
+  protocol      = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port     = 80
+
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port     = 443
+
+  [services.concurrency]
+    type       = "requests"
+    hard_limit = 200
+    soft_limit = 150
+
+  [[services.http_checks]]
+    interval     = "15s"
+    timeout      = "2s"
+    grace_period = "30s"
+    path         = "/"

@@ -6,21 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/hooks/useAppContext";
 import { UserPlus, Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
-import type { UserRole } from "@/lib/types";
 
 export default function SignUpPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    role: "student" as UserRole,
-  });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,57 +25,25 @@ export default function SignUpPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast({ title: "Password mismatch", description: "Passwords do not match.", variant: "destructive" });
+      return;
+    }
+    if (password.length < 6) {
+      toast({ title: "Password too short", description: "Password must be at least 6 characters.", variant: "destructive" });
+      return;
+    }
+
     setIsLoading(true);
-
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      toast({
-        title: "Password mismatch",
-        description: "Passwords do not match. Please try again.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      await register({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        role: formData.role,
-      });
-
-      toast({
-        title: "Account created!",
-        description: "Welcome to TaskTide! You have been automatically logged in.",
-      });
+      await register({ name, email, password });
+      toast({ title: "Account created!", description: "Welcome to TaskTide!" });
       router.push("/dashboard");
-
-    } catch (error: any) {
-      let errorMessage = "Something went wrong. Please try again.";
-
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage = "An account with this email already exists.";
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage = "Password should be at least 6 characters.";
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
+    } catch (error: unknown) {
       toast({
         title: "Registration failed",
-        description: errorMessage,
+        description: error instanceof Error ? error.message : "Something went wrong.",
         variant: "destructive",
       });
     } finally {
@@ -88,13 +51,9 @@ export default function SignUpPage() {
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
   return (
     <>
-      <CardHeader className="text-center pb-6">
+      <CardHeader className="text-center pb-6 px-0">
         <CardTitle className="text-2xl font-headline">Create Account</CardTitle>
         <CardDescription>
           Join TaskTide to start collaborating on your academic projects
@@ -108,10 +67,11 @@ export default function SignUpPage() {
             id="name"
             type="text"
             placeholder="Enter your full name"
-            value={formData.name}
-            onChange={(e) => handleInputChange("name", e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             required
             disabled={isLoading}
+            autoComplete="name"
           />
         </div>
 
@@ -121,10 +81,11 @@ export default function SignUpPage() {
             id="email"
             type="email"
             placeholder="Enter your email"
-            value={formData.email}
-            onChange={(e) => handleInputChange("email", e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
             disabled={isLoading}
+            autoComplete="email"
           />
         </div>
 
@@ -134,11 +95,12 @@ export default function SignUpPage() {
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Create a password"
-              value={formData.password}
-              onChange={(e) => handleInputChange("password", e.target.value)}
+              placeholder="Create a password (min 6 chars)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isLoading}
+              autoComplete="new-password"
             />
             <Button
               type="button"
@@ -148,11 +110,7 @@ export default function SignUpPage() {
               onClick={() => setShowPassword(!showPassword)}
               disabled={isLoading}
             >
-              {showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
           </div>
         </div>
@@ -164,10 +122,11 @@ export default function SignUpPage() {
               id="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
               placeholder="Confirm your password"
-              value={formData.confirmPassword}
-              onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               required
               disabled={isLoading}
+              autoComplete="new-password"
             />
             <Button
               type="button"
@@ -177,40 +136,17 @@ export default function SignUpPage() {
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               disabled={isLoading}
             >
-              {showConfirmPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
+              {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </Button>
           </div>
         </div>
 
-        <div className="space-y-3">
-          <Label>Account Type</Label>
-          <RadioGroup
-            value={formData.role}
-            onValueChange={(value) => handleInputChange("role", value)}
-            disabled={isLoading}
-          >
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="student" id="student" />
-              <Label htmlFor="student" className="cursor-pointer">
-                Student - Join groups and access documents
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value="class_representative" id="class_rep" />
-              <Label htmlFor="class_rep" className="cursor-pointer">
-                Class Representative - Create and manage groups
-              </Label>
-            </div>
-          </RadioGroup>
-        </div>
-
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? (
-            "Creating account..."
+            <span className="flex items-center gap-2">
+              <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+              Creating account...
+            </span>
           ) : (
             <>
               <UserPlus className="mr-2 h-4 w-4" />

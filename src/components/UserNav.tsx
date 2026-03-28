@@ -22,13 +22,13 @@ export function UserNav() {
   const router = useRouter();
 
   if (!currentUser) {
-    return null; 
+    return null;
   }
 
   const fallbackName = currentUser.name ? currentUser.name.substring(0, 2).toUpperCase() : "??";
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push("/login");
   };
 
@@ -37,11 +37,7 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-9 w-9 rounded-full">
           <Avatar className="h-9 w-9">
-            {currentUser.avatarUrl ? (
-              <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name || "User"} />
-            ) : (
-               <UserCircle className="h-9 w-9" />
-            )}
+            <UserCircle className="h-9 w-9" />
             <AvatarFallback>{fallbackName}</AvatarFallback>
           </Avatar>
         </Button>
