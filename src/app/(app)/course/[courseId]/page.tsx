@@ -2,46 +2,46 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { getCourse, getUnitsForCourse, getDocumentsForUnit, getGroupsForUnit } from "@/lib/firestore";
-import type { Course, Unit, DocumentFile, AssignmentGroup } from "@/lib/types";
+import { courseServers, units as unitsApi, documents as documentsApi, groups as groupsApi } from "@/lib/api";
+import type { ApiCourseServer, ApiUnit, ApiDocument, ApiGroup } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { DocumentCard } from "@/components/documents/DocumentCard";
-import { GroupCard } from "@/components/groups/GroupCard";
+import { Loader2 } from "lucide-react";
 
 export default function CourseDetailPage() {
   const { courseId } = useParams();
-  const [course, setCourse] = useState<Course | null>(null);
-  const [units, setUnits] = useState<Unit[]>([]);
-  const [documents, setDocuments] = useState<{ [unitId: string]: DocumentFile[] }>({});
-  const [groups, setGroups] = useState<{ [unitId: string]: AssignmentGroup[] }>({});
+  const [server, setServer] = useState<ApiCourseServer | null>(null);
+  const [units, setUnits] = useState<ApiUnit[]>([]);
+  const [documents, setDocuments] = useState<{ [unitId: number]: ApiDocument[] }>({});
+  const [groups, setGroups] = useState<{ [unitId: number]: ApiGroup[] }>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!courseId) return;
 
-    const loadCourseData = async () => {
+    const loadData = async () => {
       try {
-        const courseData = await getCourse(courseId as string);
-        setCourse(courseData);
+        const { course_server } = await courseServers.get(Number(courseId));
+        setServer(course_server);
 
-        if (courseData) {
-          const courseUnits = await getUnitsForCourse(courseData.id);
-          setUnits(courseUnits);
+        const courseUnits = course_server.units ?? [];
+        setUnits(courseUnits);
 
-          const documentsByUnit: { [unitId: string]: DocumentFile[] } = {};
-          const groupsByUnit: { [unitId: string]: AssignmentGroup[] } = {};
+        const docsByUnit: { [unitId: number]: ApiDocument[] } = {};
+        const groupsByUnit: { [unitId: number]: ApiGroup[] } = {};
 
-          for (const unit of courseUnits) {
-            const unitDocuments = await getDocumentsForUnit(unit.id);
-            documentsByUnit[unit.id] = unitDocuments;
+        await Promise.all(
+          courseUnits.map(async (unit) => {
+            const [docsRes, groupsRes] = await Promise.all([
+              documentsApi.list(unit.id),
+              groupsApi.list(unit.id),
+            ]);
+            docsByUnit[unit.id] = docsRes.documents;
+            groupsByUnit[unit.id] = groupsRes.groups;
+          })
+        );
 
-            const unitGroups = await getGroupsForUnit(unit.id);
-            groupsByUnit[unit.id] = unitGroups;
-          }
-
-          setDocuments(documentsByUnit);
-          setGroups(groupsByUnit);
-        }
+        setDocuments(docsByUnit);
+        setGroups(groupsByUnit);
       } catch (error) {
         console.error("Failed to load course data:", error);
       } finally {
@@ -49,53 +49,80 @@ export default function CourseDetailPage() {
       }
     };
 
-    loadCourseData();
+    loadData();
   }, [courseId]);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
   }
 
-  if (!course) {
-    return <div>Course not found</div>;
+  if (!server) {
+    return (
+      <div className="flex items-center justify-center h-64 text-muted-foreground">
+        Course server not found.
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto py-6">
-      <Card className="mb-8">
+    <div className="container mx-auto py-6 space-y-8">
+      <Card>
         <CardHeader>
-          <CardTitle>{course.name}</CardTitle>
-          <CardDescription>
-            {course.year} • {course.semester}
-          </CardDescription>
+          <CardTitle>{server.name}</CardTitle>
+          {server.description && <CardDescription>{server.description}</CardDescription>}
         </CardHeader>
       </Card>
 
+      {units.length === 0 && (
+        <p className="text-muted-foreground text-center py-8">No units yet.</p>
+      )}
+
       {units.map((unit) => (
-        <Card key={unit.id} className="mb-8">
+        <Card key={unit.id}>
           <CardHeader>
             <CardTitle>{unit.name}</CardTitle>
+            <CardDescription>{unit.unit_code}</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold mb-2">Documents</h3>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {documents[unit.id]?.map((doc) => (
-                  <DocumentCard key={doc.id} document={doc} />
-                ))}
-              </div>
-            </div>
+          <CardContent className="space-y-6">
+            {/* Documents */}
             <div>
-              <h3 className="text-lg font-semibold mb-2">Group Work</h3>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {groups[unit.id]?.map((group) => (
-                  <GroupCard key={group.id} group={group} />
-                ))}
-              </div>
+              <h3 className="text-base font-semibold mb-3">Documents</h3>
+              {(documents[unit.id] ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">No documents uploaded yet.</p>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {(documents[unit.id] ?? []).map((doc) => (
+                    <Card key={doc.id} className="p-4">
+                      <p className="font-medium text-sm truncate">{doc.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{doc.document_type.replace(/_/g, " ")}</p>
+                      <p className="text-xs text-muted-foreground">{doc.file_name}</p>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Groups */}
+            <div>
+              <h3 className="text-base font-semibold mb-3">Assignment Groups</h3>
+              {(groups[unit.id] ?? []).length === 0 ? (
+                <p className="text-sm text-muted-foreground">No groups set up yet.</p>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {(groups[unit.id] ?? []).map((group) => (
+                    <Card key={group.id} className="p-4">
+                      <p className="font-medium text-sm">{group.name}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {group.members_count ?? group.members?.length ?? 0} / {group.max_size} members
+                      </p>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

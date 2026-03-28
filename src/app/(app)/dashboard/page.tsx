@@ -2,21 +2,25 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAppContext } from "@/hooks/useAppContext";
-import { Users, Plus, Server, BookOpen } from "lucide-react";
+import { Users, Plus, Server, BookOpen, Hash, Crown } from "lucide-react";
 import Link from "next/link";
 import StudyTipCard from "@/components/StudyTipCard";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { courseServers, type ApiCourseServer } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import CreateServerDialog from "@/components/CreateServerDialog";
+import JoinServerDialog from "@/components/JoinServerDialog";
 
 export default function DashboardPage() {
   const { currentUser } = useAppContext();
-  const router = useRouter();
+  const isClassRep = currentUser?.role === 'class_rep';
+
   const [servers, setServers] = useState<ApiCourseServer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showCreate, setShowCreate] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
 
-  useEffect(() => {
+  const loadServers = useCallback(() => {
     if (!currentUser) return;
     courseServers
       .list()
@@ -25,25 +29,48 @@ export default function DashboardPage() {
       .finally(() => setIsLoading(false));
   }, [currentUser]);
 
+  useEffect(() => { loadServers(); }, [loadServers]);
+
+  const handleCreated = (server: ApiCourseServer) => {
+    setServers((prev) => [server, ...prev]);
+  };
+
+  const handleJoined = (server: ApiCourseServer) => {
+    setServers((prev) => {
+      if (prev.some((s) => s.id === server.id)) return prev;
+      return [server, ...prev];
+    });
+  };
+
   if (!currentUser) return null;
 
   const totalUnits = servers.reduce((sum, s) => sum + (s.units?.length ?? 0), 0);
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6 space-y-8">
       {/* Welcome Banner */}
-      <Card className="mb-8 shadow-lg border-none bg-gradient-to-r from-primary to-purple-600 text-primary-foreground">
+      <Card className="shadow-lg border-none bg-gradient-to-r from-primary to-purple-600 text-primary-foreground">
         <CardHeader>
-          <CardTitle className="text-3xl font-headline">
-            Welcome back, {currentUser.name.split(" ")[0]}! 👋
-          </CardTitle>
-          <CardDescription className="text-lg text-purple-200">
-            Here's your academic overview. Manage your tasks and resources efficiently.
-          </CardDescription>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <CardTitle className="text-2xl sm:text-3xl font-headline">
+                Welcome back, {currentUser.name.split(" ")[0]}! 👋
+              </CardTitle>
+              <CardDescription className="text-base sm:text-lg text-purple-200 mt-1">
+                Here's your academic overview.
+              </CardDescription>
+            </div>
+            {isClassRep && (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-yellow-400/20 text-yellow-300 border border-yellow-400/40 px-3 py-1.5 rounded-full w-fit">
+                <Crown className="h-3.5 w-3.5" />
+                Class Representative
+              </span>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-purple-300">
-            You are currently logged in as a{" "}
+            Signed in as a{" "}
             <span className="font-semibold capitalize">
               {currentUser.role.replace(/_/g, " ")}
             </span>
@@ -52,7 +79,7 @@ export default function DashboardPage() {
       </Card>
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         <Card>
           <CardContent className="pt-6 text-center">
             <p className="text-3xl font-bold text-primary">{servers.length}</p>
@@ -74,15 +101,31 @@ export default function DashboardPage() {
       </div>
 
       {/* Course Servers */}
-      <Card className="mb-8">
+      <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-headline flex items-center">
-            <Server className="mr-3 h-7 w-7 text-primary" />
-            Your Courses
-          </CardTitle>
-          <CardDescription>
-            Servers you've created or joined ({servers.length} total)
-          </CardDescription>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <CardTitle className="text-xl sm:text-2xl font-headline flex items-center">
+                <Server className="mr-3 h-6 w-6 text-primary flex-shrink-0" />
+                Your Courses
+              </CardTitle>
+              <CardDescription>
+                Servers you've created or joined ({servers.length} total)
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {isClassRep && (
+                <Button size="sm" onClick={() => setShowCreate(true)} className="gap-1.5">
+                  <Plus className="h-3.5 w-3.5" />
+                  Create
+                </Button>
+              )}
+              <Button size="sm" variant="outline" onClick={() => setShowJoin(true)} className="gap-1.5">
+                <Hash className="h-3.5 w-3.5" />
+                Join
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -124,27 +167,68 @@ export default function DashboardPage() {
                 </Link>
               ))}
 
-              {/* Add Server Button */}
-              <Card
-                className="border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors cursor-pointer group"
-                onClick={() => router.push("/rooms")}
-              >
-                <CardContent className="flex flex-col items-center justify-center h-full p-6 text-center min-h-[130px]">
-                  <div className="mx-auto bg-primary/10 text-primary rounded-full p-4 w-fit mb-4 group-hover:bg-primary/20 transition-colors">
-                    <Plus className="h-8 w-8" />
-                  </div>
-                  <h3 className="font-semibold text-primary mb-2">Browse / Join</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Explore units or join a new server
-                  </p>
-                </CardContent>
-              </Card>
+              {/* Empty state card */}
+              {servers.length === 0 && (
+                <Card className="border-2 border-dashed border-primary/30 col-span-full">
+                  <CardContent className="flex flex-col items-center justify-center p-8 text-center">
+                    <Server className="h-12 w-12 text-muted-foreground mb-3" />
+                    {isClassRep ? (
+                      <>
+                        <p className="font-semibold text-foreground mb-1">No servers yet</p>
+                        <p className="text-sm text-muted-foreground mb-4">Create your first course server to get started.</p>
+                        <Button size="sm" onClick={() => setShowCreate(true)} className="gap-1.5">
+                          <Plus className="h-3.5 w-3.5" /> Create Server
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-semibold text-foreground mb-1">No servers joined yet</p>
+                        <p className="text-sm text-muted-foreground mb-4">Ask your class rep for a join code.</p>
+                        <Button size="sm" variant="outline" onClick={() => setShowJoin(true)} className="gap-1.5">
+                          <Hash className="h-3.5 w-3.5" /> Join with Code
+                        </Button>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Add more card */}
+              {servers.length > 0 && (
+                <Card
+                  className="border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors cursor-pointer group"
+                  onClick={() => isClassRep ? setShowCreate(true) : setShowJoin(true)}
+                >
+                  <CardContent className="flex flex-col items-center justify-center h-full p-6 text-center min-h-[130px]">
+                    <div className="mx-auto bg-primary/10 text-primary rounded-full p-4 w-fit mb-4 group-hover:bg-primary/20 transition-colors">
+                      {isClassRep ? <Plus className="h-8 w-8" /> : <Hash className="h-8 w-8" />}
+                    </div>
+                    <h3 className="font-semibold text-primary mb-2">
+                      {isClassRep ? "Create Server" : "Join Server"}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {isClassRep ? "Set up a new course server" : "Join with a class rep code"}
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           )}
         </CardContent>
       </Card>
 
       <StudyTipCard />
+
+      <CreateServerDialog
+        open={showCreate}
+        onOpenChange={setShowCreate}
+        onCreated={handleCreated}
+      />
+      <JoinServerDialog
+        open={showJoin}
+        onOpenChange={setShowJoin}
+        onJoined={handleJoined}
+      />
     </div>
   );
 }

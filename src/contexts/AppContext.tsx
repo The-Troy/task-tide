@@ -26,9 +26,10 @@ interface AppContextType {
     email: string;
     password: string;
     role: UserRole;
-  }) => Promise<boolean>;
+  }) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  updateProfile: (name: string) => Promise<void>;
 }
 
 // ---------------------------------------------------------------------------
@@ -94,7 +95,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     email: string;
     password: string;
     role: UserRole;
-  }): Promise<boolean> => {
+  }): Promise<void> => {
     setIsLoading(true);
     try {
       const { user } = await auth.register({
@@ -105,9 +106,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         role: userData.role,
       });
       setCurrentUser(toAppUser(user));
-      return true;
-    } catch {
-      return false;
     } finally {
       setIsLoading(false);
     }
@@ -137,6 +135,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  // ------------------------------------------------------------------
+  // Update profile name
+  // ------------------------------------------------------------------
+  const updateProfile = useCallback(async (name: string): Promise<void> => {
+    const { user } = await auth.updateProfile(name);
+    setCurrentUser(toAppUser(user));
+  }, []);
+
   return (
     <AppContext.Provider value={{
       currentUser,
@@ -146,6 +152,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       register,
       logout,
       refreshUser,
+      updateProfile,
     }}>
       {children}
     </AppContext.Provider>

@@ -1,0 +1,11 @@
+# dependencies
+node_modules/
+
+# env — secrets; keep example committed
+.env
+.env.*
+!.env.example
+
+# build / logs
+dist/
+*.log

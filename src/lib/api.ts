@@ -3,7 +3,7 @@
  * Central layer for all communication with the Laravel backend.
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:8000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? 'http://127.0.0.1:3001/api';
 const TOKEN_KEY = 'tasktide_token';
 
 // ---------------------------------------------------------------------------
@@ -207,6 +207,13 @@ export const auth = {
 
   async me(): Promise<{ user: ApiUser }> {
     return request<{ user: ApiUser }>('/auth/me');
+  },
+
+  async updateProfile(name: string): Promise<{ user: ApiUser }> {
+    return request<{ user: ApiUser }>('/auth/profile', {
+      method: 'PUT',
+      body: JSON.stringify({ name }),
+    });
   },
 };
 
