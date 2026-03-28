@@ -180,8 +180,6 @@ export const auth = {
     name: string;
     email: string;
     password: string;
-    password_confirmation: string;
-    role: Role;
   }): Promise<{ user: ApiUser; token: string }> {
     const data = await request<{ user: ApiUser; token: string }>('/auth/register', {
       method: 'POST',

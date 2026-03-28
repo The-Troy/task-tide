@@ -6,22 +6,21 @@ const router = Router();
 
 // POST /api/auth/register
 router.post('/register', async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
-    if (!name || !email || !password || !role) {
-        res.status(422).json({ message: 'name, email, password and role are required.' });
+    if (!name || !email || !password) {
+        res.status(422).json({ message: 'name, email and password are required.' });
         return;
     }
-    if (!['student', 'class_rep'].includes(role)) {
-        res.status(422).json({ message: 'Role must be student or class_rep.' });
-        return;
-    }
+
+    // Everyone starts as a student; creating a course server promotes them to class_rep
+    const role = 'student';
 
     // Create Supabase Auth user
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email,
         password,
-        email_confirm: true, // skip email confirmation for now
+        email_confirm: true,
         user_metadata: { name, role },
     });
 

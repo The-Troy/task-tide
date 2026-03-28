@@ -115,29 +115,20 @@ export default function AllUnitsPage() {
         <Card>
           <CardContent className="py-16 text-center">
             <Server className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-            {isClassRep ? (
-              <>
-                <p className="text-xl text-foreground font-semibold mb-2">Create your first course server</p>
-                <p className="text-sm text-muted-foreground mb-6">
-                  As a class representative, you can create a course server and share the join code with your classmates.
-                </p>
-                <Button onClick={() => setShowCreate(true)} className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Create Course Server
-                </Button>
-              </>
-            ) : (
-              <>
-                <p className="text-xl text-foreground font-semibold mb-2">No course servers joined yet</p>
-                <p className="text-sm text-muted-foreground mb-6">
-                  Ask your class representative for a join code to get started.
-                </p>
-                <Button onClick={() => setShowJoin(true)} variant="outline" className="gap-2">
-                  <Hash className="h-4 w-4" />
-                  Join with a Code
-                </Button>
-              </>
-            )}
+            <p className="text-xl text-foreground font-semibold mb-2">No course servers yet</p>
+            <p className="text-sm text-muted-foreground mb-6">
+              Create a course server to get started, or join one with a code.
+            </p>
+            <div className="flex justify-center gap-3">
+              <Button onClick={() => setShowCreate(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Create Server
+              </Button>
+              <Button onClick={() => setShowJoin(true)} variant="outline" className="gap-2">
+                <Hash className="h-4 w-4" />
+                Join with Code
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : (

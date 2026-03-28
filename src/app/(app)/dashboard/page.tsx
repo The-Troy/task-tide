@@ -114,12 +114,10 @@ export default function DashboardPage() {
               </CardDescription>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              {isClassRep && (
-                <Button size="sm" onClick={() => setShowCreate(true)} className="gap-1.5">
-                  <Plus className="h-3.5 w-3.5" />
-                  Create
-                </Button>
-              )}
+              <Button size="sm" onClick={() => setShowCreate(true)} className="gap-1.5">
+                <Plus className="h-3.5 w-3.5" />
+                Create
+              </Button>
               <Button size="sm" variant="outline" onClick={() => setShowJoin(true)} className="gap-1.5">
                 <Hash className="h-3.5 w-3.5" />
                 Join
@@ -172,23 +170,18 @@ export default function DashboardPage() {
                 <Card className="border-2 border-dashed border-primary/30 col-span-full">
                   <CardContent className="flex flex-col items-center justify-center p-8 text-center">
                     <Server className="h-12 w-12 text-muted-foreground mb-3" />
-                    {isClassRep ? (
-                      <>
-                        <p className="font-semibold text-foreground mb-1">No servers yet</p>
-                        <p className="text-sm text-muted-foreground mb-4">Create your first course server to get started.</p>
-                        <Button size="sm" onClick={() => setShowCreate(true)} className="gap-1.5">
-                          <Plus className="h-3.5 w-3.5" /> Create Server
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <p className="font-semibold text-foreground mb-1">No servers joined yet</p>
-                        <p className="text-sm text-muted-foreground mb-4">Ask your class rep for a join code.</p>
-                        <Button size="sm" variant="outline" onClick={() => setShowJoin(true)} className="gap-1.5">
-                          <Hash className="h-3.5 w-3.5" /> Join with Code
-                        </Button>
-                      </>
-                    )}
+                    <p className="font-semibold text-foreground mb-1">No servers yet</p>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Create a course server to get started, or join one with a code.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => setShowCreate(true)} className="gap-1.5">
+                        <Plus className="h-3.5 w-3.5" /> Create Server
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => setShowJoin(true)} className="gap-1.5">
+                        <Hash className="h-3.5 w-3.5" /> Join with Code
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               )}

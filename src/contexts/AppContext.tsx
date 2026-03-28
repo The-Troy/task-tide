@@ -25,7 +25,6 @@ interface AppContextType {
     name: string;
     email: string;
     password: string;
-    role: UserRole;
   }) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -94,7 +93,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     name: string;
     email: string;
     password: string;
-    role: UserRole;
   }): Promise<void> => {
     setIsLoading(true);
     try {
@@ -102,8 +100,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         name: userData.name,
         email: userData.email,
         password: userData.password,
-        password_confirmation: userData.password,
-        role: userData.role,
       });
       setCurrentUser(toAppUser(user));
     } finally {

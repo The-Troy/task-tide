@@ -48,8 +48,8 @@ router.get('/', authenticate, async (req, res) => {
     res.json({ course_servers: data });
 });
 
-// POST /api/course-servers  — class_rep only
-router.post('/', authenticate, requireClassRep, async (req, res) => {
+// POST /api/course-servers  — any authenticated user; promotes them to class_rep
+router.post('/', authenticate, async (req, res) => {
     const { name, description } = req.body;
     if (!name) { res.status(422).json({ message: 'name is required.' }); return; }
 
@@ -61,6 +61,12 @@ router.post('/', authenticate, requireClassRep, async (req, res) => {
         code = generateCode(name);
     }
 
+    // Promote user to class_rep if not already
+    if (req.user!.role !== 'class_rep') {
+        await supabase.from('profiles').update({ role: 'class_rep' }).eq('id', req.user!.id);
+        req.user!.role = 'class_rep';
+    }
+
     const { data, error } = await supabase
         .from('course_servers')
         .insert({ name, description, code, class_rep_id: req.user!.id })
@@ -69,7 +75,7 @@ router.post('/', authenticate, requireClassRep, async (req, res) => {
 
     if (error) { res.status(500).json({ message: error.message }); return; }
 
-    // Class rep is auto-enrolled
+    // Creator is auto-enrolled
     await supabase.from('user_course_servers').insert({ user_id: req.user!.id, course_server_id: data.id });
 
     res.status(201).json({ course_server: data });
